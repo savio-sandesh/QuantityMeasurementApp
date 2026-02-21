@@ -1,4 +1,7 @@
-﻿namespace QuantityMeasurementApp.Tests;
+﻿﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QuantityMeasurementApp;
+
+namespace QuantityMeasurementApp.Tests;
 
 [TestClass]
 public sealed class Test1
