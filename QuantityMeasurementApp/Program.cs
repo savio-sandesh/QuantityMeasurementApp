@@ -3,8 +3,9 @@
 namespace QuantityMeasurementApp
 {
     /// <summary>
-    /// Entry point of Quantity Measurement Application.
-    /// Responsible for user interaction and calling domain logic.
+    /// Entry point for UC1: Feet Measurement Equality.
+    /// Handles user interaction and delegates equality comparison
+    /// to the LengthInFeet value object.
     /// </summary>
     internal class Program
     {
@@ -15,8 +16,8 @@ namespace QuantityMeasurementApp
             double firstValue = ReadDouble("Enter first value in feet: ");
             double secondValue = ReadDouble("Enter second value in feet: ");
 
-            var firstMeasurement = new QuantityMeasurement(firstValue);
-            var secondMeasurement = new QuantityMeasurement(secondValue);
+            LengthInFeet firstMeasurement = new LengthInFeet(firstValue);
+            LengthInFeet secondMeasurement = new LengthInFeet(secondValue);
 
             bool result = firstMeasurement.Equals(secondMeasurement);
 
@@ -24,7 +25,7 @@ namespace QuantityMeasurementApp
         }
 
         /// <summary>
-        /// Reads and validates numeric input from console.
+        /// Reads numeric input from console with validation.
         /// </summary>
         private static double ReadDouble(string message)
         {
