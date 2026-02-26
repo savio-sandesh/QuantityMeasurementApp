@@ -3,46 +3,46 @@ using System;
 namespace QuantityMeasurementApp
 {
     /// <summary>
-    /// Represents an immutable length measurement in feet.
-    /// Supports value-based equality and cross-unit comparison with inches.
+    /// Represents an immutable length measurement in inches.
+    /// Supports value-based equality and cross-unit comparison with feet.
     /// </summary>
-    public class LengthInFeet
+    public class LengthInInch
     {
-        // Immutable storage of the measurement value in feet
+        // Immutable storage of the measurement value in inches
         private readonly double value;
 
         // Tolerance to handle floating-point precision issues
         private const double Tolerance = 0.0001;
 
         /// <summary>
-        /// Gets the measurement value in feet.
+        /// Gets the measurement value in inches.
         /// </summary>
         public double Value => value;
 
         /// <summary>
-        /// Initializes a new instance of LengthInFeet.
+        /// Initializes a new instance of LengthInInch.
         /// </summary>
-        /// <param name="value">Measurement value in feet.</param>
-        public LengthInFeet(double value)
+        /// <param name="value">Measurement value in inches.</param>
+        public LengthInInch(double value)
         {
             this.value = value;
         }
 
         /// <summary>
         /// Determines equality with another measurement.
-        /// Supports Feet-to-Feet and Feet-to-Inch comparison.
+        /// Supports Inch-to-Inch and Inch-to-Feet comparison.
         /// </summary>
         public override bool Equals(object? obj)
         {
             if (obj is null) return false;
 
-            // Feet-to-Feet comparison
-            if (obj is LengthInFeet otherFeet)
-                return Math.Abs(this.value - otherFeet.value) <= Tolerance;
-
-            // Feet-to-Inch comparison (convert inches to feet)
+            // Inch-to-Inch comparison
             if (obj is LengthInInch otherInch)
-                return Math.Abs(this.value - (otherInch.Value / 12)) <= Tolerance;
+                return Math.Abs(this.value - otherInch.value) <= Tolerance;
+
+            // Inch-to-Feet comparison (convert feet to inches)
+            if (obj is LengthInFeet otherFeet)
+                return Math.Abs((this.value / 12) - otherFeet.Value) <= Tolerance;
 
             return false;
         }

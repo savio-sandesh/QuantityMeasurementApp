@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- remove this package -->
+    <!-- <PackageReference Include="Microsoft.VisualStudio.Shell.Framework" Version="17.14.40264" /> -->
+  </ItemGroup>
+
 </Project>
