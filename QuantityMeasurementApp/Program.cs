@@ -244,7 +244,7 @@ namespace QuantityMeasurementApp
 
         private static void DemonstrateGenericQuantityUc10()
         {
-            Console.WriteLine("=== Generic Quantity Demo (UC10) ===");
+            Console.WriteLine("=== Generic Quantity Demo (UC10/UC11) ===");
 
             var lengthFeet = new Quantity<LengthUnit>(1.0, LengthUnit.Feet);
             var lengthInch = new Quantity<LengthUnit>(12.0, LengthUnit.Inch);
@@ -265,6 +265,16 @@ namespace QuantityMeasurementApp
 
             var totalWeight = DemonstrateAddition(weightKg, weightGram, WeightUnit.Kilogram);
             Console.WriteLine($"Weight addition: {totalWeight}");
+
+            var volumeLitre = new Quantity<VolumeUnit>(1.0, VolumeUnit.Litre);
+            var volumeMilli = new Quantity<VolumeUnit>(1000.0, VolumeUnit.Millilitre);
+            Console.WriteLine($"Volume equality: {DemonstrateEquality(volumeLitre, volumeMilli)}");
+
+            var convertedVolume = DemonstrateConversion(volumeLitre, VolumeUnit.Gallon);
+            Console.WriteLine($"Volume conversion: {convertedVolume}");
+
+            var totalVolume = DemonstrateAddition(volumeLitre, volumeMilli, VolumeUnit.Litre);
+            Console.WriteLine($"Volume addition: {totalVolume}");
         }
     }
 }

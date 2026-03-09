@@ -9,6 +9,7 @@ Small .NET sample: length and weight quantities with multi-unit arithmetic and c
 ## Features
 - `Length` supports equality, conversion, and addition across units (`Feet`, `Inch`, `Yard`, `Centimeter`).
 - `Weight` supports equality, conversion, and addition across units (`Kilogram`, `Gram`, `Pound`).
+- `Volume` supports equality, conversion, and addition across units (`Litre`, `Millilitre`, `Gallon`).
 - `Quantity<TUnit>` provides a single generic implementation for equality, conversion, and addition across supported categories.
 - Automatic unit conversion for arithmetic through base-unit normalization.
 - Result in first operand's unit for default `Add(...)` behavior.
@@ -33,6 +34,21 @@ Summary:
 - Preserves compile-time type safety through generics (`Quantity<LengthUnit>` is not `Quantity<WeightUnit>`).
 - Adds generic demonstration methods in `Program` and a UC10 demo menu option.
 - Keeps UC1-UC9 classes and tests operational while adding UC10 architecture.
+
+## Implemented (UC11) - Volume Measurement with Generic Quantity
+
+Files:
+- `QuantityMeasurementApp/VolumeUnit.cs`
+- `QuantityMeasurementApp/VolumeUnitMeasurable.cs`
+- `QuantityMeasurementApp/MeasurableRegistry.cs`
+- `QuantityMeasurementApp/Program.cs`
+- `QuantityMeasurementApp.Tests/QuantityTests.cs`
+
+Summary:
+- Adds a third category (`VolumeUnit`) using the existing generic `Quantity<TUnit>` architecture.
+- Conversion factors are relative to litre as base unit: `Litre=1.0`, `Millilitre=0.001`, `Gallon=3.78541`.
+- No changes were needed in `Quantity<TUnit>`; only adapter registration and tests were extended.
+- Confirms scalability of UC10 architecture by adding a new category with minimal code changes.
 
 ## Getting Started
 
@@ -151,6 +167,7 @@ Summary:
 - `5` Convert weight units
 - `6` Add two weights
 - `7` Run generic quantity demo (UC10)
+- Option `7` now demonstrates generic operations for length, weight, and volume.
 
 ## Notes on Naming
 - In this C# codebase, Java-style names like `QuantityLength`/`QuantityWeight` are represented by `Length`/`Weight`.
