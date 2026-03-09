@@ -3,21 +3,23 @@
 namespace QuantityMeasurementApp
 {
     /// <summary>
-    /// Entry point for UC1: Feet Measurement Equality.
-    /// Handles user interaction and delegates equality comparison
-    /// to the LengthInFeet value object.
+    /// Entry point for generic length equality comparison.
+    /// Supports Feet, Inch, Yard, and Centimeter units.
     /// </summary>
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("=== UC1: Feet Measurement Equality ===");
+            Console.WriteLine("=== Quantity Length Equality ===");
 
-            double firstValue = ReadDouble("Enter first value in feet: ");
-            double secondValue = ReadDouble("Enter second value in feet: ");
+            double firstValue = ReadDouble("Enter first numeric value: ");
+            LengthUnit firstUnit = ReadUnit("Enter first unit (Feet, Inch, Yard, Centimeter): ");
 
-            LengthInFeet firstMeasurement = new LengthInFeet(firstValue);
-            LengthInFeet secondMeasurement = new LengthInFeet(secondValue);
+            double secondValue = ReadDouble("Enter second numeric value: ");
+            LengthUnit secondUnit = ReadUnit("Enter second unit (Feet, Inch, Yard, Centimeter): ");
+
+            Length firstMeasurement = new Length(firstValue, firstUnit);
+            Length secondMeasurement = new Length(secondValue, secondUnit);
 
             bool result = firstMeasurement.Equals(secondMeasurement);
 
@@ -38,6 +40,23 @@ namespace QuantityMeasurementApp
                     return parsedValue;
 
                 Console.WriteLine("Invalid number format. Please enter a valid numeric value.");
+            }
+        }
+
+        /// <summary>
+        /// Reads unit input from console with validation.
+        /// </summary>
+        private static LengthUnit ReadUnit(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+                string? input = Console.ReadLine();
+
+                if (Enum.TryParse<LengthUnit>(input, ignoreCase: true, out var unit))
+                    return unit;
+
+                Console.WriteLine("Invalid unit. Use one of: Feet, Inch, Yard, Centimeter.");
             }
         }
     }

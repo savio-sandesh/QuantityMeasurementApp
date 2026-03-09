@@ -35,6 +35,8 @@ namespace QuantityMeasurementApp
             {
                 LengthUnit.Feet => value,
                 LengthUnit.Inch => value / 12,
+                LengthUnit.Yard => value * 3,
+                LengthUnit.Centimeter => (value * 0.393701) / 12,
                 _ => throw new ArgumentException("Unsupported length unit")
             };
         }
@@ -65,9 +67,9 @@ namespace QuantityMeasurementApp
     /// <summary>
     /// Supported length units.
     /// </summary>
-    public enum LengthUnit
-    {
-        Feet,
-        Inch
-    }
+    // public enum LengthUnit
+    // {
+    //     Feet,
+    //     Inch
+    // }
 }
