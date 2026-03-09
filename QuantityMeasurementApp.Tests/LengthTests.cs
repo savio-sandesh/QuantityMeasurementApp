@@ -428,5 +428,49 @@ namespace QuantityMeasurementApp.Tests
             Assert.ThrowsException<ArgumentException>(() =>
                 Length.Add(new Length(1.0, LengthUnit.Feet), new Length(12.0, LengthUnit.Inch), (LengthUnit)999));
         }
+
+        [TestMethod]
+        public void GivenLengthUnitFeet_WhenReadingConversionFactor_ShouldReturnOne()
+        {
+            Assert.AreEqual(1.0, LengthUnit.Feet.GetConversionFactor(), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenLengthUnitInch_WhenReadingConversionFactor_ShouldReturnExpectedValue()
+        {
+            Assert.AreEqual(1.0 / 12.0, LengthUnit.Inch.GetConversionFactor(), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenLengthUnitYard_WhenConvertingToBaseUnit_ShouldReturnFeetValue()
+        {
+            double result = LengthUnit.Yard.ConvertToBaseUnit(1.0);
+
+            Assert.AreEqual(3.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenLengthUnitInch_WhenConvertingToBaseUnit_ShouldReturnFeetValue()
+        {
+            double result = LengthUnit.Inch.ConvertToBaseUnit(12.0);
+
+            Assert.AreEqual(1.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenLengthUnitInch_WhenConvertingFromBaseUnit_ShouldReturnInchValue()
+        {
+            double result = LengthUnit.Inch.ConvertFromBaseUnit(1.0);
+
+            Assert.AreEqual(12.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenLengthUnitCentimeter_WhenConvertingFromBaseUnit_ShouldReturnExpectedValue()
+        {
+            double result = LengthUnit.Centimeter.ConvertFromBaseUnit(1.0);
+
+            Assert.AreEqual(30.48, result, 0.0001);
+        }
     }
 }

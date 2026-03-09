@@ -34,7 +34,7 @@ namespace QuantityMeasurementApp
             Unit = unit;
 
             // Convert to base unit (Feet)
-            valueInFeet = value * unit.ToFeetFactor();
+            valueInFeet = unit.ConvertToBaseUnit(value);
         }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace QuantityMeasurementApp
             ValidateUnit(sourceUnit, nameof(sourceUnit));
             ValidateUnit(targetUnit, nameof(targetUnit));
 
-            double valueInFeet = value * sourceUnit.ToFeetFactor();
-            return valueInFeet / targetUnit.ToFeetFactor();
+            double valueInFeet = sourceUnit.ConvertToBaseUnit(value);
+            return targetUnit.ConvertFromBaseUnit(valueInFeet);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace QuantityMeasurementApp
         public double ConvertTo(LengthUnit targetUnit)
         {
             ValidateUnit(targetUnit, nameof(targetUnit));
-            return valueInFeet / targetUnit.ToFeetFactor();
+            return targetUnit.ConvertFromBaseUnit(valueInFeet);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace QuantityMeasurementApp
             ValidateUnit(targetUnit, nameof(targetUnit));
 
             double sumInFeet = first.valueInFeet + second.valueInFeet;
-            double resultValue = sumInFeet / targetUnit.ToFeetFactor();
+            double resultValue = targetUnit.ConvertFromBaseUnit(sumInFeet);
 
             return new Length(resultValue, targetUnit);
         }
@@ -156,7 +156,7 @@ namespace QuantityMeasurementApp
 
         private static void ValidateUnit(LengthUnit unit, string parameterName)
         {
-            if (!unit.IsDefined())
+            if (!Enum.IsDefined(typeof(LengthUnit), unit))
             {
                 throw new ArgumentException("Unsupported length unit", parameterName);
             }

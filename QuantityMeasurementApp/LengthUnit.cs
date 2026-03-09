@@ -1,7 +1,8 @@
 namespace QuantityMeasurementApp
 {
     /// <summary>
-    /// Enumeration representing the units of length measurement.
+    /// Enumeration representing supported length units.
+    /// Each enum value stores its conversion factor relative to feet (base unit).
     /// </summary>
     public enum LengthUnit
     {
@@ -12,14 +13,15 @@ namespace QuantityMeasurementApp
     }
 
     /// <summary>
-    /// Extension methods for LengthUnit conversion behavior.
+    /// Conversion behavior for LengthUnit values.
     /// </summary>
-    public static class LengthUnitExtensions
+    public static class LengthUnitConversions
     {
+
         /// <summary>
-        /// Returns the conversion factor relative to feet.
+        /// Returns this unit's factor relative to feet.
         /// </summary>
-        public static double ToFeetFactor(this LengthUnit unit)
+        public static double GetConversionFactor(this LengthUnit unit)
         {
             return unit switch
             {
@@ -32,11 +34,19 @@ namespace QuantityMeasurementApp
         }
 
         /// <summary>
-        /// Validates that the enum value is a defined LengthUnit constant.
+        /// Converts a value in this unit to feet (base unit).
         /// </summary>
-        public static bool IsDefined(this LengthUnit unit)
+        public static double ConvertToBaseUnit(this LengthUnit unit, double value)
         {
-            return Enum.IsDefined(typeof(LengthUnit), unit);
+            return value * unit.GetConversionFactor();
+        }
+
+        /// <summary>
+        /// Converts a value from feet (base unit) to this unit.
+        /// </summary>
+        public static double ConvertFromBaseUnit(this LengthUnit unit, double baseValue)
+        {
+            return baseValue / unit.GetConversionFactor();
         }
     }
 }
