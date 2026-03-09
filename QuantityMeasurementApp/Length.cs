@@ -65,6 +65,53 @@ namespace QuantityMeasurementApp
         }
 
         /// <summary>
+        /// Adds another length to this length and returns the sum in this instance's unit.
+        /// </summary>
+        public Length Add(Length other)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            return Add(this, other, this.Unit);
+        }
+
+        /// <summary>
+        /// Adds two lengths and returns the result in the requested target unit.
+        /// </summary>
+        public static Length Add(Length first, Length second, LengthUnit targetUnit)
+        {
+            if (first is null)
+            {
+                throw new ArgumentNullException(nameof(first));
+            }
+
+            if (second is null)
+            {
+                throw new ArgumentNullException(nameof(second));
+            }
+
+            ValidateUnit(targetUnit, nameof(targetUnit));
+
+            double sumInFeet = first.valueInFeet + second.valueInFeet;
+            double resultValue = sumInFeet / targetUnit.ToFeetFactor();
+
+            return new Length(resultValue, targetUnit);
+        }
+
+        /// <summary>
+        /// Adds two raw values with units and returns the sum in the requested target unit.
+        /// </summary>
+        public static Length Add(double firstValue, LengthUnit firstUnit, double secondValue, LengthUnit secondUnit, LengthUnit targetUnit)
+        {
+            var first = new Length(firstValue, firstUnit);
+            var second = new Length(secondValue, secondUnit);
+
+            return Add(first, second, targetUnit);
+        }
+
+        /// <summary>
         /// Determines equality between two Length objects.
         /// Comparison is performed using base unit conversion.
         /// </summary>

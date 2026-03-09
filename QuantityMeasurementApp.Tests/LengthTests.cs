@@ -224,5 +224,147 @@ namespace QuantityMeasurementApp.Tests
 
             Assert.AreEqual(36.0, result, Epsilon);
         }
+
+        [TestMethod]
+        public void GivenFeetAndFeet_WhenAdded_ShouldReturnSumInFeet()
+        {
+            var first = new Length(1.0, LengthUnit.Feet);
+            var second = new Length(2.0, LengthUnit.Feet);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(3.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+            Assert.AreEqual(LengthUnit.Feet, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenInchAndInch_WhenAdded_ShouldReturnSumInInch()
+        {
+            var first = new Length(6.0, LengthUnit.Inch);
+            var second = new Length(6.0, LengthUnit.Inch);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(12.0, result.ConvertTo(LengthUnit.Inch), Epsilon);
+            Assert.AreEqual(LengthUnit.Inch, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenFeetAndInch_WhenAdded_ShouldReturnSumInFirstOperandUnit()
+        {
+            var first = new Length(1.0, LengthUnit.Feet);
+            var second = new Length(12.0, LengthUnit.Inch);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(2.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+            Assert.AreEqual(LengthUnit.Feet, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenInchAndFeet_WhenAdded_ShouldReturnSumInFirstOperandUnit()
+        {
+            var first = new Length(12.0, LengthUnit.Inch);
+            var second = new Length(1.0, LengthUnit.Feet);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(24.0, result.ConvertTo(LengthUnit.Inch), Epsilon);
+            Assert.AreEqual(LengthUnit.Inch, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenYardAndFeet_WhenAdded_ShouldReturnExpectedSum()
+        {
+            var result = Length.Add(new Length(1.0, LengthUnit.Yard), new Length(3.0, LengthUnit.Feet), LengthUnit.Yard);
+
+            Assert.AreEqual(2.0, result.ConvertTo(LengthUnit.Yard), Epsilon);
+            Assert.AreEqual(LengthUnit.Yard, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenCentimeterAndInch_WhenAdded_ShouldReturnExpectedSumInCentimeter()
+        {
+            var first = new Length(2.54, LengthUnit.Centimeter);
+            var second = new Length(1.0, LengthUnit.Inch);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(5.08, result.ConvertTo(LengthUnit.Centimeter), 0.00001);
+            Assert.AreEqual(LengthUnit.Centimeter, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenEquivalentOperands_WhenAddedWithDifferentOrder_ShouldBeCommutative()
+        {
+            var first = new Length(1.0, LengthUnit.Feet);
+            var second = new Length(12.0, LengthUnit.Inch);
+
+            var resultOne = Length.Add(first, second, LengthUnit.Feet);
+            var resultTwo = Length.Add(second, first, LengthUnit.Feet);
+
+            Assert.AreEqual(resultOne.ConvertTo(LengthUnit.Feet), resultTwo.ConvertTo(LengthUnit.Feet), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenZeroLength_WhenAdded_ShouldBehaveAsIdentity()
+        {
+            var first = new Length(5.0, LengthUnit.Feet);
+            var zero = new Length(0.0, LengthUnit.Inch);
+
+            var result = first.Add(zero);
+
+            Assert.AreEqual(5.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenNegativeLength_WhenAdded_ShouldReturnExpectedSum()
+        {
+            var first = new Length(5.0, LengthUnit.Feet);
+            var second = new Length(-2.0, LengthUnit.Feet);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(3.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenNullSecondOperand_WhenAdded_ShouldThrowArgumentNullException()
+        {
+            var first = new Length(1.0, LengthUnit.Feet);
+
+            Assert.ThrowsException<ArgumentNullException>(() => first.Add(null!));
+        }
+
+        [TestMethod]
+        public void GivenLargeValues_WhenAdded_ShouldReturnExpectedSum()
+        {
+            var first = new Length(1_000_000.0, LengthUnit.Feet);
+            var second = new Length(1_000_000.0, LengthUnit.Feet);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(2_000_000.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenSmallValues_WhenAdded_ShouldReturnExpectedSum()
+        {
+            var first = new Length(0.001, LengthUnit.Feet);
+            var second = new Length(0.002, LengthUnit.Feet);
+
+            var result = first.Add(second);
+
+            Assert.AreEqual(0.003, result.ConvertTo(LengthUnit.Feet), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenRawValues_WhenAddedWithOverload_ShouldReturnExpectedResult()
+        {
+            var result = Length.Add(1.0, LengthUnit.Feet, 12.0, LengthUnit.Inch, LengthUnit.Feet);
+
+            Assert.AreEqual(2.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
+            Assert.AreEqual(LengthUnit.Feet, result.Unit);
+        }
     }
 }

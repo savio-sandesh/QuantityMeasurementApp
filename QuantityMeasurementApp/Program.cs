@@ -13,8 +13,9 @@ namespace QuantityMeasurementApp
             Console.WriteLine("=== Quantity Measurement App ===");
             Console.WriteLine("1. Compare two lengths");
             Console.WriteLine("2. Convert units");
+            Console.WriteLine("3. Add two lengths");
 
-            int option = ReadOption("Choose an option (1 or 2): ");
+            int option = ReadOption("Choose an option (1, 2, or 3): ");
 
             if (option == 1)
             {
@@ -22,7 +23,13 @@ namespace QuantityMeasurementApp
                 return;
             }
 
-            DemonstrateLengthConversion();
+            if (option == 2)
+            {
+                DemonstrateLengthConversion();
+                return;
+            }
+
+            DemonstrateLengthAddition();
         }
 
         private static void DemonstrateLengthComparison()
@@ -55,6 +62,23 @@ namespace QuantityMeasurementApp
             Console.WriteLine($"Converted Value: {converted}");
         }
 
+        private static void DemonstrateLengthAddition()
+        {
+            Console.WriteLine("=== Length Addition ===");
+
+            double firstValue = ReadDouble("Enter first numeric value: ");
+            LengthUnit firstUnit = ReadUnit("Enter first unit (Feet, Inch, Yard, Centimeter): ");
+
+            double secondValue = ReadDouble("Enter second numeric value: ");
+            LengthUnit secondUnit = ReadUnit("Enter second unit (Feet, Inch, Yard, Centimeter): ");
+
+            var first = new Length(firstValue, firstUnit);
+            var second = new Length(secondValue, secondUnit);
+            var sum = first.Add(second);
+
+            Console.WriteLine($"Sum Value: {sum.ConvertTo(firstUnit)} {firstUnit}");
+        }
+
         /// <summary>
         /// Reads numeric input from console with validation.
         /// </summary>
@@ -79,10 +103,10 @@ namespace QuantityMeasurementApp
                 Console.Write(message);
                 string? input = Console.ReadLine();
 
-                if (int.TryParse(input, out int option) && (option == 1 || option == 2))
+                if (int.TryParse(input, out int option) && (option == 1 || option == 2 || option == 3))
                     return option;
 
-                Console.WriteLine("Invalid option. Enter 1 or 2.");
+                Console.WriteLine("Invalid option. Enter 1, 2, or 3.");
             }
         }
 
