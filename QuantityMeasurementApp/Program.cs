@@ -17,8 +17,9 @@ namespace QuantityMeasurementApp
             Console.WriteLine("4. Compare two weights");
             Console.WriteLine("5. Convert weight units");
             Console.WriteLine("6. Add two weights");
+            Console.WriteLine("7. Run generic quantity demo (UC10)");
 
-            int option = ReadOption("Choose an option (1-6): ");
+            int option = ReadOption("Choose an option (1-7): ");
 
             if (option == 1)
             {
@@ -50,7 +51,13 @@ namespace QuantityMeasurementApp
                 return;
             }
 
-            DemonstrateWeightAddition();
+            if (option == 6)
+            {
+                DemonstrateWeightAddition();
+                return;
+            }
+
+            DemonstrateGenericQuantityUc10();
         }
 
         private static void DemonstrateLengthComparison()
@@ -125,10 +132,10 @@ namespace QuantityMeasurementApp
                 Console.Write(message);
                 string? input = Console.ReadLine();
 
-                if (int.TryParse(input, out int option) && option >= 1 && option <= 6)
+                if (int.TryParse(input, out int option) && option >= 1 && option <= 7)
                     return option;
 
-                Console.WriteLine("Invalid option. Enter a value from 1 to 6.");
+                Console.WriteLine("Invalid option. Enter a value from 1 to 7.");
             }
         }
 
@@ -209,6 +216,55 @@ namespace QuantityMeasurementApp
 
                 Console.WriteLine("Invalid unit. Use one of: Kilogram, Gram, Pound.");
             }
+        }
+
+        private static bool DemonstrateEquality<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second)
+            where TUnit : struct, Enum
+        {
+            return first.Equals(second);
+        }
+
+        private static Quantity<TUnit> DemonstrateConversion<TUnit>(Quantity<TUnit> quantity, TUnit targetUnit)
+            where TUnit : struct, Enum
+        {
+            return quantity.ConvertTo(targetUnit);
+        }
+
+        private static Quantity<TUnit> DemonstrateAddition<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second)
+            where TUnit : struct, Enum
+        {
+            return first.Add(second);
+        }
+
+        private static Quantity<TUnit> DemonstrateAddition<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second, TUnit targetUnit)
+            where TUnit : struct, Enum
+        {
+            return first.Add(second, targetUnit);
+        }
+
+        private static void DemonstrateGenericQuantityUc10()
+        {
+            Console.WriteLine("=== Generic Quantity Demo (UC10) ===");
+
+            var lengthFeet = new Quantity<LengthUnit>(1.0, LengthUnit.Feet);
+            var lengthInch = new Quantity<LengthUnit>(12.0, LengthUnit.Inch);
+            Console.WriteLine($"Length equality: {DemonstrateEquality(lengthFeet, lengthInch)}");
+
+            var convertedLength = DemonstrateConversion(lengthFeet, LengthUnit.Inch);
+            Console.WriteLine($"Length conversion: {convertedLength}");
+
+            var totalLength = DemonstrateAddition(lengthFeet, lengthInch, LengthUnit.Feet);
+            Console.WriteLine($"Length addition: {totalLength}");
+
+            var weightKg = new Quantity<WeightUnit>(1.0, WeightUnit.Kilogram);
+            var weightGram = new Quantity<WeightUnit>(1000.0, WeightUnit.Gram);
+            Console.WriteLine($"Weight equality: {DemonstrateEquality(weightKg, weightGram)}");
+
+            var convertedWeight = DemonstrateConversion(weightKg, WeightUnit.Pound);
+            Console.WriteLine($"Weight conversion: {convertedWeight}");
+
+            var totalWeight = DemonstrateAddition(weightKg, weightGram, WeightUnit.Kilogram);
+            Console.WriteLine($"Weight addition: {totalWeight}");
         }
     }
 }

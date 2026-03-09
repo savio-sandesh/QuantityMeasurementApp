@@ -9,11 +9,30 @@ Small .NET sample: length and weight quantities with multi-unit arithmetic and c
 ## Features
 - `Length` supports equality, conversion, and addition across units (`Feet`, `Inch`, `Yard`, `Centimeter`).
 - `Weight` supports equality, conversion, and addition across units (`Kilogram`, `Gram`, `Pound`).
+- `Quantity<TUnit>` provides a single generic implementation for equality, conversion, and addition across supported categories.
 - Automatic unit conversion for arithmetic through base-unit normalization.
 - Result in first operand's unit for default `Add(...)` behavior.
 - Explicit target-unit addition overloads.
 - Conversion API: static `Convert()` and instance `ConvertTo()` methods.
 - Tolerance-based equality and normalized `GetHashCode()`.
+
+## Implemented (UC10) - Generic Quantity Class with Unit Interface
+
+Files:
+- `QuantityMeasurementApp/IMeasurableUnit.cs`
+- `QuantityMeasurementApp/MeasurableRegistry.cs`
+- `QuantityMeasurementApp/LengthUnitMeasurable.cs`
+- `QuantityMeasurementApp/WeightUnitMeasurable.cs`
+- `QuantityMeasurementApp/Quantity.cs`
+- `QuantityMeasurementApp/Program.cs`
+- `QuantityMeasurementApp.Tests/QuantityTests.cs`
+
+Summary:
+- Introduces one generic class `Quantity<TUnit>` to replace duplicated category-specific quantity logic.
+- Uses a shared measurable contract (`IMeasurableUnit<TUnit>`) for conversion behavior.
+- Preserves compile-time type safety through generics (`Quantity<LengthUnit>` is not `Quantity<WeightUnit>`).
+- Adds generic demonstration methods in `Program` and a UC10 demo menu option.
+- Keeps UC1-UC9 classes and tests operational while adding UC10 architecture.
 
 ## Getting Started
 
@@ -131,10 +150,12 @@ Summary:
 - `4` Compare two weights
 - `5` Convert weight units
 - `6` Add two weights
+- `7` Run generic quantity demo (UC10)
 
 ## Notes on Naming
 - In this C# codebase, Java-style names like `QuantityLength`/`QuantityWeight` are represented by `Length`/`Weight`.
 - Functionality is equivalent to the UC intent.
+- Java-style enum-interface implementation is adapted to C# using measurable adapters because C# enums cannot implement custom interfaces.
 
 ## Legacy Compatibility Classes
 - `QuantityMeasurementApp/LengthInFeet.cs` and `QuantityMeasurementApp/LengthInInch.cs` remain in the repository from earlier incremental steps.
