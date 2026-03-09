@@ -9,6 +9,8 @@ namespace QuantityMeasurementApp.Tests
     [TestClass]
     public class LengthTests
     {
+        private const double Epsilon = 0.000001;
+
         [TestMethod]
         public void GivenSameFeetValue_WhenCompared_ShouldReturnTrue()
         {
@@ -108,6 +110,119 @@ namespace QuantityMeasurementApp.Tests
             Assert.IsTrue(yard.Equals(feet));
             Assert.IsTrue(feet.Equals(inch));
             Assert.IsTrue(yard.Equals(inch));
+        }
+
+        [TestMethod]
+        public void GivenFeet_WhenConvertedToInch_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(1.0, LengthUnit.Feet, LengthUnit.Inch);
+
+            Assert.AreEqual(12.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenInch_WhenConvertedToFeet_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(24.0, LengthUnit.Inch, LengthUnit.Feet);
+
+            Assert.AreEqual(2.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenYard_WhenConvertedToInch_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(1.0, LengthUnit.Yard, LengthUnit.Inch);
+
+            Assert.AreEqual(36.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenInch_WhenConvertedToYard_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(72.0, LengthUnit.Inch, LengthUnit.Yard);
+
+            Assert.AreEqual(2.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenCentimeter_WhenConvertedToInch_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(2.54, LengthUnit.Centimeter, LengthUnit.Inch);
+
+            Assert.AreEqual(1.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenFeet_WhenConvertedToYard_ShouldReturnExpectedValue()
+        {
+            double result = Length.Convert(6.0, LengthUnit.Feet, LengthUnit.Yard);
+
+            Assert.AreEqual(2.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenValue_WhenRoundTrippedAcrossUnits_ShouldPreserveValue()
+        {
+            double value = 5.25;
+            double inches = Length.Convert(value, LengthUnit.Feet, LengthUnit.Inch);
+            double feet = Length.Convert(inches, LengthUnit.Inch, LengthUnit.Feet);
+
+            Assert.AreEqual(value, feet, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenZeroValue_WhenConverted_ShouldReturnZero()
+        {
+            double result = Length.Convert(0.0, LengthUnit.Feet, LengthUnit.Inch);
+
+            Assert.AreEqual(0.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenNegativeValue_WhenConverted_ShouldPreserveSign()
+        {
+            double result = Length.Convert(-1.0, LengthUnit.Feet, LengthUnit.Inch);
+
+            Assert.AreEqual(-12.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenSameSourceAndTargetUnit_WhenConverted_ShouldReturnOriginalValue()
+        {
+            double result = Length.Convert(5.0, LengthUnit.Feet, LengthUnit.Feet);
+
+            Assert.AreEqual(5.0, result, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenInvalidUnit_WhenConverted_ShouldThrowArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+                Length.Convert(1.0, (LengthUnit)999, LengthUnit.Feet));
+        }
+
+        [TestMethod]
+        public void GivenNaNValue_WhenConverted_ShouldThrowArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+                Length.Convert(double.NaN, LengthUnit.Feet, LengthUnit.Inch));
+        }
+
+        [TestMethod]
+        public void GivenInfiniteValue_WhenConverted_ShouldThrowArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+                Length.Convert(double.PositiveInfinity, LengthUnit.Feet, LengthUnit.Inch));
+        }
+
+        [TestMethod]
+        public void GivenLengthInstance_WhenConvertedToTargetUnit_ShouldReturnExpectedValue()
+        {
+            var length = new Length(1.0, LengthUnit.Yard);
+
+            double result = length.ConvertTo(LengthUnit.Inch);
+
+            Assert.AreEqual(36.0, result, Epsilon);
         }
     }
 }

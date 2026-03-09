@@ -28,17 +28,40 @@ namespace QuantityMeasurementApp
         /// <param name="unit">Unit of measurement.</param>
         public Length(double value, LengthUnit unit)
         {
+            ValidateFinite(value);
+            ValidateUnit(unit, nameof(unit));
+
             Unit = unit;
 
             // Convert to base unit (Feet)
-            valueInFeet = unit switch
-            {
-                LengthUnit.Feet => value,
-                LengthUnit.Inch => value / 12,
-                LengthUnit.Yard => value * 3,
-                LengthUnit.Centimeter => (value * 0.393701) / 12,
-                _ => throw new ArgumentException("Unsupported length unit")
-            };
+            valueInFeet = value * unit.ToFeetFactor();
+        }
+
+        /// <summary>
+        /// Converts a numeric length from one unit to another.
+        /// </summary>
+        /// <param name="value">Numeric value to convert.</param>
+        /// <param name="sourceUnit">Source unit.</param>
+        /// <param name="targetUnit">Target unit.</param>
+        /// <returns>Converted value in target unit.</returns>
+        /// <exception cref="ArgumentException">Thrown when value is not finite or when units are invalid.</exception>
+        public static double Convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit)
+        {
+            ValidateFinite(value);
+            ValidateUnit(sourceUnit, nameof(sourceUnit));
+            ValidateUnit(targetUnit, nameof(targetUnit));
+
+            double valueInFeet = value * sourceUnit.ToFeetFactor();
+            return valueInFeet / targetUnit.ToFeetFactor();
+        }
+
+        /// <summary>
+        /// Converts this measurement to the requested unit and returns the numeric value.
+        /// </summary>
+        public double ConvertTo(LengthUnit targetUnit)
+        {
+            ValidateUnit(targetUnit, nameof(targetUnit));
+            return valueInFeet / targetUnit.ToFeetFactor();
         }
 
         /// <summary>
@@ -61,6 +84,22 @@ namespace QuantityMeasurementApp
         {
             double normalized = Math.Round(valueInFeet / Tolerance) * Tolerance;
             return normalized.GetHashCode();
+        }
+
+        private static void ValidateFinite(double value)
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                throw new ArgumentException("Value must be a finite number", nameof(value));
+            }
+        }
+
+        private static void ValidateUnit(LengthUnit unit, string parameterName)
+        {
+            if (!unit.IsDefined())
+            {
+                throw new ArgumentException("Unsupported length unit", parameterName);
+            }
         }
     }
 
