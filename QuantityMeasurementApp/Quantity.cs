@@ -34,26 +34,12 @@ namespace QuantityMeasurementApp
 
         public Quantity<TUnit> Add(Quantity<TUnit> other)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
             return Add(other, Unit);
         }
 
         public Quantity<TUnit> Add(Quantity<TUnit> other, TUnit targetUnit)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            ValidateUnit(targetUnit, nameof(targetUnit));
-
-            double sumInBase = valueInBaseUnit + other.valueInBaseUnit;
-            double resultValue = measurable.ConvertFromBaseUnit(targetUnit, sumInBase);
-            return new Quantity<TUnit>(resultValue, targetUnit);
+            return PerformQuantityArithmetic(other, targetUnit, ArithmeticOperation.Add);
         }
 
         public static Quantity<TUnit> Add(Quantity<TUnit> first, Quantity<TUnit> second)
@@ -88,26 +74,12 @@ namespace QuantityMeasurementApp
 
         public Quantity<TUnit> Subtract(Quantity<TUnit> other)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
             return Subtract(other, Unit);
         }
 
         public Quantity<TUnit> Subtract(Quantity<TUnit> other, TUnit targetUnit)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            ValidateUnit(targetUnit, nameof(targetUnit));
-
-            double differenceInBase = valueInBaseUnit - other.valueInBaseUnit;
-            double resultValue = measurable.ConvertFromBaseUnit(targetUnit, differenceInBase);
-            return new Quantity<TUnit>(resultValue, targetUnit);
+            return PerformQuantityArithmetic(other, targetUnit, ArithmeticOperation.Subtract);
         }
 
         public static Quantity<TUnit> Subtract(Quantity<TUnit> first, Quantity<TUnit> second)
@@ -142,17 +114,7 @@ namespace QuantityMeasurementApp
 
         public double Divide(Quantity<TUnit> other)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            if (Math.Abs(other.valueInBaseUnit) <= Tolerance)
-            {
-                throw new ArithmeticException("Division by zero quantity is not allowed.");
-            }
-
-            return valueInBaseUnit / other.valueInBaseUnit;
+            return PerformScalarArithmetic(other, ArithmeticOperation.Divide);
         }
 
         public static double Divide(Quantity<TUnit> first, Quantity<TUnit> second)
@@ -210,6 +172,72 @@ namespace QuantityMeasurementApp
             {
                 throw new ArgumentException("Unsupported unit", parameterName);
             }
+        }
+
+        // Centralized path for all quantity-returning arithmetic operations.
+        private Quantity<TUnit> PerformQuantityArithmetic(Quantity<TUnit> other, TUnit targetUnit, ArithmeticOperation operation)
+        {
+            ValidateArithmeticOperands(other, targetUnit, targetUnitRequired: true);
+
+            double resultInBase = Compute(operation, valueInBaseUnit, other.valueInBaseUnit);
+            double resultValue = measurable.ConvertFromBaseUnit(targetUnit, resultInBase);
+
+            return new Quantity<TUnit>(resultValue, targetUnit);
+        }
+
+        private double PerformScalarArithmetic(Quantity<TUnit> other, ArithmeticOperation operation)
+        {
+            ValidateArithmeticOperands(other, targetUnit: null, targetUnitRequired: false);
+            return Compute(operation, valueInBaseUnit, other.valueInBaseUnit);
+        }
+
+        private static void ValidateArithmeticOperands(Quantity<TUnit> other, TUnit? targetUnit, bool targetUnitRequired)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            ValidateFinite(other.Value);
+            ValidateUnit(other.Unit, nameof(other));
+
+            if (targetUnitRequired)
+            {
+                if (!targetUnit.HasValue)
+                {
+                    throw new ArgumentNullException(nameof(targetUnit));
+                }
+
+                ValidateUnit(targetUnit.Value, nameof(targetUnit));
+            }
+        }
+
+        private enum ArithmeticOperation
+        {
+            Add,
+            Subtract,
+            Divide
+        }
+
+        private static double Compute(ArithmeticOperation operation, double left, double right)
+        {
+            return operation switch
+            {
+                ArithmeticOperation.Add => left + right,
+                ArithmeticOperation.Subtract => left - right,
+                ArithmeticOperation.Divide => ComputeDivision(left, right),
+                _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, "Unsupported arithmetic operation")
+            };
+        }
+
+        private static double ComputeDivision(double left, double right)
+        {
+            if (Math.Abs(right) <= Tolerance)
+            {
+                throw new ArithmeticException("Division by zero quantity is not allowed.");
+            }
+
+            return left / right;
         }
     }
 }

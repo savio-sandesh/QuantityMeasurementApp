@@ -360,5 +360,42 @@ namespace QuantityMeasurementApp.Tests
             Assert.AreEqual(6.0, second.Value, Epsilon);
             Assert.AreEqual(LengthUnit.Inch, second.Unit);
         }
+
+        [TestMethod]
+        public void GivenStaticSubtractWithTarget_WhenCalled_ShouldReturnExpectedResult()
+        {
+            var first = new Quantity<WeightUnit>(10.0, WeightUnit.Kilogram);
+            var second = new Quantity<WeightUnit>(2000.0, WeightUnit.Gram);
+
+            var result = Quantity<WeightUnit>.Subtract(first, second, WeightUnit.Gram);
+
+            Assert.AreEqual(8000.0, result.Value, Epsilon);
+            Assert.AreEqual(WeightUnit.Gram, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenStaticDivide_WhenCalled_ShouldReturnExpectedRatio()
+        {
+            var first = new Quantity<VolumeUnit>(1000.0, VolumeUnit.Millilitre);
+            var second = new Quantity<VolumeUnit>(1.0, VolumeUnit.Litre);
+
+            double ratio = Quantity<VolumeUnit>.Divide(first, second);
+
+            Assert.AreEqual(1.0, ratio, Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenArithmeticChain_WhenExecuted_ShouldReturnExpectedResult()
+        {
+            var start = new Quantity<LengthUnit>(10.0, LengthUnit.Feet);
+            var add = new Quantity<LengthUnit>(12.0, LengthUnit.Inch);
+            var subtract = new Quantity<LengthUnit>(6.0, LengthUnit.Inch);
+            var divisor = new Quantity<LengthUnit>(5.0, LengthUnit.Feet);
+
+            var composed = start.Add(add).Subtract(subtract);
+            double ratio = composed.Divide(divisor);
+
+            Assert.AreEqual(2.1, ratio, Epsilon);
+        }
     }
 }
