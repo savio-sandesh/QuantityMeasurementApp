@@ -64,19 +64,20 @@ namespace QuantityMeasurementApp
 
         private static void DemonstrateLengthAddition()
         {
-            Console.WriteLine("=== Length Addition ===");
+            Console.WriteLine("=== Length Addition (Target Unit) ===");
 
             double firstValue = ReadDouble("Enter first numeric value: ");
             LengthUnit firstUnit = ReadUnit("Enter first unit (Feet, Inch, Yard, Centimeter): ");
 
             double secondValue = ReadDouble("Enter second numeric value: ");
             LengthUnit secondUnit = ReadUnit("Enter second unit (Feet, Inch, Yard, Centimeter): ");
+            LengthUnit targetUnit = ReadUnit("Enter target result unit (Feet, Inch, Yard, Centimeter): ");
 
             var first = new Length(firstValue, firstUnit);
             var second = new Length(secondValue, secondUnit);
-            var sum = first.Add(second);
+            var sum = first.Add(second, targetUnit);
 
-            Console.WriteLine($"Sum Value: {sum.ConvertTo(firstUnit)} {firstUnit}");
+            Console.WriteLine($"Sum Value: {sum.ConvertTo(targetUnit)} {targetUnit}");
         }
 
         /// <summary>

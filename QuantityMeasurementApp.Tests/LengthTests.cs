@@ -366,5 +366,67 @@ namespace QuantityMeasurementApp.Tests
             Assert.AreEqual(2.0, result.ConvertTo(LengthUnit.Feet), Epsilon);
             Assert.AreEqual(LengthUnit.Feet, result.Unit);
         }
+
+        [TestMethod]
+        public void GivenFeetAndInches_WhenAddedWithTargetInches_ShouldReturnResultInInches()
+        {
+            var first = new Length(1.0, LengthUnit.Feet);
+            var second = new Length(12.0, LengthUnit.Inch);
+
+            var result = first.Add(second, LengthUnit.Inch);
+
+            Assert.AreEqual(24.0, result.ConvertTo(LengthUnit.Inch), Epsilon);
+            Assert.AreEqual(LengthUnit.Inch, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenFeetAndInches_WhenAddedWithTargetYard_ShouldReturnResultInYard()
+        {
+            var result = Length.Add(new Length(1.0, LengthUnit.Feet), new Length(12.0, LengthUnit.Inch), LengthUnit.Yard);
+
+            Assert.AreEqual(2.0 / 3.0, result.ConvertTo(LengthUnit.Yard), Epsilon);
+            Assert.AreEqual(LengthUnit.Yard, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenInches_WhenAddedWithTargetCentimeter_ShouldReturnExpectedValue()
+        {
+            var result = Length.Add(new Length(1.0, LengthUnit.Inch), new Length(1.0, LengthUnit.Inch), LengthUnit.Centimeter);
+
+            Assert.AreEqual(5.08, result.ConvertTo(LengthUnit.Centimeter), 0.00001);
+            Assert.AreEqual(LengthUnit.Centimeter, result.Unit);
+        }
+
+        [TestMethod]
+        public void GivenAdditionWithTargetUnit_WhenOrderSwapped_ShouldRemainCommutative()
+        {
+            var left = Length.Add(new Length(1.0, LengthUnit.Feet), new Length(12.0, LengthUnit.Inch), LengthUnit.Yard);
+            var right = Length.Add(new Length(12.0, LengthUnit.Inch), new Length(1.0, LengthUnit.Feet), LengthUnit.Yard);
+
+            Assert.AreEqual(left.ConvertTo(LengthUnit.Yard), right.ConvertTo(LengthUnit.Yard), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenZeroOperand_WhenAddedWithTargetYard_ShouldReturnExpectedValue()
+        {
+            var result = Length.Add(new Length(5.0, LengthUnit.Feet), new Length(0.0, LengthUnit.Inch), LengthUnit.Yard);
+
+            Assert.AreEqual(5.0 / 3.0, result.ConvertTo(LengthUnit.Yard), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenNegativeValue_WhenAddedWithTargetInch_ShouldReturnExpectedValue()
+        {
+            var result = Length.Add(new Length(5.0, LengthUnit.Feet), new Length(-2.0, LengthUnit.Feet), LengthUnit.Inch);
+
+            Assert.AreEqual(36.0, result.ConvertTo(LengthUnit.Inch), Epsilon);
+        }
+
+        [TestMethod]
+        public void GivenInvalidTargetUnit_WhenAdded_ShouldThrowArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+                Length.Add(new Length(1.0, LengthUnit.Feet), new Length(12.0, LengthUnit.Inch), (LengthUnit)999));
+        }
     }
 }

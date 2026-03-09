@@ -78,6 +78,19 @@ namespace QuantityMeasurementApp
         }
 
         /// <summary>
+        /// Adds another length to this length and returns the sum in the specified target unit.
+        /// </summary>
+        public Length Add(Length other, LengthUnit targetUnit)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            return Add(this, other, targetUnit);
+        }
+
+        /// <summary>
         /// Adds two lengths and returns the result in the requested target unit.
         /// </summary>
         public static Length Add(Length first, Length second, LengthUnit targetUnit)
