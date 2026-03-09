@@ -86,6 +86,90 @@ namespace QuantityMeasurementApp
             return first.Add(second, targetUnit);
         }
 
+        public Quantity<TUnit> Subtract(Quantity<TUnit> other)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            return Subtract(other, Unit);
+        }
+
+        public Quantity<TUnit> Subtract(Quantity<TUnit> other, TUnit targetUnit)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            ValidateUnit(targetUnit, nameof(targetUnit));
+
+            double differenceInBase = valueInBaseUnit - other.valueInBaseUnit;
+            double resultValue = measurable.ConvertFromBaseUnit(targetUnit, differenceInBase);
+            return new Quantity<TUnit>(resultValue, targetUnit);
+        }
+
+        public static Quantity<TUnit> Subtract(Quantity<TUnit> first, Quantity<TUnit> second)
+        {
+            if (first is null)
+            {
+                throw new ArgumentNullException(nameof(first));
+            }
+
+            if (second is null)
+            {
+                throw new ArgumentNullException(nameof(second));
+            }
+
+            return first.Subtract(second);
+        }
+
+        public static Quantity<TUnit> Subtract(Quantity<TUnit> first, Quantity<TUnit> second, TUnit targetUnit)
+        {
+            if (first is null)
+            {
+                throw new ArgumentNullException(nameof(first));
+            }
+
+            if (second is null)
+            {
+                throw new ArgumentNullException(nameof(second));
+            }
+
+            return first.Subtract(second, targetUnit);
+        }
+
+        public double Divide(Quantity<TUnit> other)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            if (Math.Abs(other.valueInBaseUnit) <= Tolerance)
+            {
+                throw new ArithmeticException("Division by zero quantity is not allowed.");
+            }
+
+            return valueInBaseUnit / other.valueInBaseUnit;
+        }
+
+        public static double Divide(Quantity<TUnit> first, Quantity<TUnit> second)
+        {
+            if (first is null)
+            {
+                throw new ArgumentNullException(nameof(first));
+            }
+
+            if (second is null)
+            {
+                throw new ArgumentNullException(nameof(second));
+            }
+
+            return first.Divide(second);
+        }
+
         public override bool Equals(object? obj)
         {
             if (ReferenceEquals(this, obj))

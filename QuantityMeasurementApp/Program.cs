@@ -242,9 +242,27 @@ namespace QuantityMeasurementApp
             return first.Add(second, targetUnit);
         }
 
+        private static Quantity<TUnit> DemonstrateSubtraction<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second)
+            where TUnit : struct, Enum
+        {
+            return first.Subtract(second);
+        }
+
+        private static Quantity<TUnit> DemonstrateSubtraction<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second, TUnit targetUnit)
+            where TUnit : struct, Enum
+        {
+            return first.Subtract(second, targetUnit);
+        }
+
+        private static double DemonstrateDivision<TUnit>(Quantity<TUnit> first, Quantity<TUnit> second)
+            where TUnit : struct, Enum
+        {
+            return first.Divide(second);
+        }
+
         private static void DemonstrateGenericQuantityUc10()
         {
-            Console.WriteLine("=== Generic Quantity Demo (UC10/UC11) ===");
+            Console.WriteLine("=== Generic Quantity Demo (UC10/UC11/UC12) ===");
 
             var lengthFeet = new Quantity<LengthUnit>(1.0, LengthUnit.Feet);
             var lengthInch = new Quantity<LengthUnit>(12.0, LengthUnit.Inch);
@@ -256,6 +274,12 @@ namespace QuantityMeasurementApp
             var totalLength = DemonstrateAddition(lengthFeet, lengthInch, LengthUnit.Feet);
             Console.WriteLine($"Length addition: {totalLength}");
 
+            var differenceLength = DemonstrateSubtraction(lengthFeet, lengthInch, LengthUnit.Feet);
+            Console.WriteLine($"Length subtraction: {differenceLength}");
+
+            var ratioLength = DemonstrateDivision(lengthFeet, new Quantity<LengthUnit>(6.0, LengthUnit.Inch));
+            Console.WriteLine($"Length division ratio: {ratioLength:0.######}");
+
             var weightKg = new Quantity<WeightUnit>(1.0, WeightUnit.Kilogram);
             var weightGram = new Quantity<WeightUnit>(1000.0, WeightUnit.Gram);
             Console.WriteLine($"Weight equality: {DemonstrateEquality(weightKg, weightGram)}");
@@ -266,6 +290,12 @@ namespace QuantityMeasurementApp
             var totalWeight = DemonstrateAddition(weightKg, weightGram, WeightUnit.Kilogram);
             Console.WriteLine($"Weight addition: {totalWeight}");
 
+            var differenceWeight = DemonstrateSubtraction(weightKg, new Quantity<WeightUnit>(500.0, WeightUnit.Gram), WeightUnit.Kilogram);
+            Console.WriteLine($"Weight subtraction: {differenceWeight}");
+
+            var ratioWeight = DemonstrateDivision(weightKg, new Quantity<WeightUnit>(500.0, WeightUnit.Gram));
+            Console.WriteLine($"Weight division ratio: {ratioWeight:0.######}");
+
             var volumeLitre = new Quantity<VolumeUnit>(1.0, VolumeUnit.Litre);
             var volumeMilli = new Quantity<VolumeUnit>(1000.0, VolumeUnit.Millilitre);
             Console.WriteLine($"Volume equality: {DemonstrateEquality(volumeLitre, volumeMilli)}");
@@ -275,6 +305,12 @@ namespace QuantityMeasurementApp
 
             var totalVolume = DemonstrateAddition(volumeLitre, volumeMilli, VolumeUnit.Litre);
             Console.WriteLine($"Volume addition: {totalVolume}");
+
+            var differenceVolume = DemonstrateSubtraction(volumeLitre, new Quantity<VolumeUnit>(250.0, VolumeUnit.Millilitre), VolumeUnit.Millilitre);
+            Console.WriteLine($"Volume subtraction: {differenceVolume}");
+
+            var ratioVolume = DemonstrateDivision(volumeLitre, new Quantity<VolumeUnit>(500.0, VolumeUnit.Millilitre));
+            Console.WriteLine($"Volume division ratio: {ratioVolume:0.######}");
         }
     }
 }
