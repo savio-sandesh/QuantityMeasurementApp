@@ -397,5 +397,102 @@ namespace QuantityMeasurementApp.Tests
 
             Assert.AreEqual(2.1, ratio, Epsilon);
         }
+
+        [TestMethod]
+        public void GivenTemperatureUnits_WhenComparedAcrossUnits_ShouldReturnTrue()
+        {
+            var celsius = new Quantity<TemperatureUnit>(0.0, TemperatureUnit.Celsius);
+            var fahrenheit = new Quantity<TemperatureUnit>(32.0, TemperatureUnit.Fahrenheit);
+
+            Assert.IsTrue(celsius.Equals(fahrenheit));
+        }
+
+        [TestMethod]
+        public void GivenTemperatureQuantity_WhenConvertedCelsiusToFahrenheit_ShouldReturnExpectedValue()
+        {
+            var celsius = new Quantity<TemperatureUnit>(100.0, TemperatureUnit.Celsius);
+
+            var fahrenheit = celsius.ConvertTo(TemperatureUnit.Fahrenheit);
+
+            Assert.AreEqual(212.0, fahrenheit.Value, Epsilon);
+            Assert.AreEqual(TemperatureUnit.Fahrenheit, fahrenheit.Unit);
+        }
+
+        [TestMethod]
+        public void GivenTemperatureQuantity_WhenConvertedKelvinToCelsius_ShouldReturnExpectedValue()
+        {
+            var kelvin = new Quantity<TemperatureUnit>(273.15, TemperatureUnit.Kelvin);
+
+            var celsius = kelvin.ConvertTo(TemperatureUnit.Celsius);
+
+            Assert.AreEqual(0.0, celsius.Value, Epsilon);
+            Assert.AreEqual(TemperatureUnit.Celsius, celsius.Unit);
+        }
+
+        [TestMethod]
+        public void GivenTemperatureQuantity_WhenAdded_ShouldThrowUnsupportedOperationException()
+        {
+            var first = new Quantity<TemperatureUnit>(100.0, TemperatureUnit.Celsius);
+            var second = new Quantity<TemperatureUnit>(50.0, TemperatureUnit.Celsius);
+
+            Assert.ThrowsException<UnsupportedOperationException>(() => first.Add(second));
+        }
+
+        [TestMethod]
+        public void GivenTemperatureQuantity_WhenSubtracted_ShouldThrowUnsupportedOperationException()
+        {
+            var first = new Quantity<TemperatureUnit>(100.0, TemperatureUnit.Celsius);
+            var second = new Quantity<TemperatureUnit>(50.0, TemperatureUnit.Celsius);
+
+            Assert.ThrowsException<UnsupportedOperationException>(() => first.Subtract(second));
+        }
+
+        [TestMethod]
+        public void GivenTemperatureQuantity_WhenDivided_ShouldThrowUnsupportedOperationException()
+        {
+            var first = new Quantity<TemperatureUnit>(100.0, TemperatureUnit.Celsius);
+            var second = new Quantity<TemperatureUnit>(50.0, TemperatureUnit.Celsius);
+
+            Assert.ThrowsException<UnsupportedOperationException>(() => first.Divide(second));
+        }
+
+        [TestMethod]
+        public void GivenTemperatureUnits_WhenConvertedRoundTrip_ShouldPreserveValueWithinTolerance()
+        {
+            var original = new Quantity<TemperatureUnit>(-40.0, TemperatureUnit.Celsius);
+
+            var roundTrip = original
+                .ConvertTo(TemperatureUnit.Fahrenheit)
+                .ConvertTo(TemperatureUnit.Celsius);
+
+            Assert.AreEqual(original.Value, roundTrip.Value, Epsilon);
+            Assert.AreEqual(TemperatureUnit.Celsius, roundTrip.Unit);
+        }
+
+        [TestMethod]
+        public void GivenLengthMeasurable_WhenCheckingArithmeticSupport_ShouldReturnTrueByDefault()
+        {
+            IMeasurableUnit<LengthUnit> measurable = MeasurableRegistry.For<LengthUnit>();
+
+            Assert.IsTrue(measurable.SupportsArithmeticOperations());
+        }
+
+        [TestMethod]
+        public void GivenTemperatureMeasurable_WhenCheckingArithmeticSupport_ShouldReturnFalse()
+        {
+            IMeasurableUnit<TemperatureUnit> measurable = MeasurableRegistry.For<TemperatureUnit>();
+
+            Assert.IsFalse(measurable.SupportsArithmeticOperations());
+        }
+
+        [TestMethod]
+        public void GivenTemperatureMeasurable_WhenValidatingOperation_ShouldThrowWithClearMessage()
+        {
+            IMeasurableUnit<TemperatureUnit> measurable = MeasurableRegistry.For<TemperatureUnit>();
+
+            var exception = Assert.ThrowsException<UnsupportedOperationException>(() => measurable.ValidateOperationSupport("Add"));
+
+            StringAssert.Contains(exception.Message, "Temperature does not support");
+        }
     }
 }

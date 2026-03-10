@@ -178,6 +178,7 @@ namespace QuantityMeasurementApp
         private Quantity<TUnit> PerformQuantityArithmetic(Quantity<TUnit> other, TUnit targetUnit, ArithmeticOperation operation)
         {
             ValidateArithmeticOperands(other, targetUnit, targetUnitRequired: true);
+            measurable.ValidateOperationSupport(operation.ToString());
 
             double resultInBase = Compute(operation, valueInBaseUnit, other.valueInBaseUnit);
             double resultValue = measurable.ConvertFromBaseUnit(targetUnit, resultInBase);
@@ -188,6 +189,7 @@ namespace QuantityMeasurementApp
         private double PerformScalarArithmetic(Quantity<TUnit> other, ArithmeticOperation operation)
         {
             ValidateArithmeticOperands(other, targetUnit: null, targetUnitRequired: false);
+            measurable.ValidateOperationSupport(operation.ToString());
             return Compute(operation, valueInBaseUnit, other.valueInBaseUnit);
         }
 

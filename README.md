@@ -1,6 +1,6 @@
 # QuantityMeasurementApp
 
-Small .NET sample: length and weight quantities with multi-unit arithmetic and conversions.
+Small .NET sample: length, weight, volume, and temperature quantities with conversion and type-safe operations.
 
 ## Prerequisites
 - .NET SDK 10.0 or later
@@ -10,13 +10,16 @@ Small .NET sample: length and weight quantities with multi-unit arithmetic and c
 - `Length` supports equality, conversion, and addition across units (`Feet`, `Inch`, `Yard`, `Centimeter`).
 - `Weight` supports equality, conversion, and addition across units (`Kilogram`, `Gram`, `Pound`).
 - `Volume` supports equality, conversion, and addition across units (`Litre`, `Millilitre`, `Gallon`).
+- `Temperature` supports equality and conversion across units (`Celsius`, `Fahrenheit`, `Kelvin`).
 - `Quantity<TUnit>` provides a single generic implementation for equality, conversion, and addition across supported categories.
 - `Quantity<TUnit>` now supports subtraction and division operations in addition to equality, conversion, and addition.
+- UC14 operation capability checks allow category-specific constraints (for example, temperature arithmetic is blocked for absolute values).
 - Automatic unit conversion for arithmetic through base-unit normalization.
 - Result in first operand's unit for default `Add(...)` behavior.
 - Explicit target-unit addition overloads.
 - Conversion API: static `Convert()` and instance `ConvertTo()` methods.
 - Tolerance-based equality and normalized `GetHashCode()`.
+- Non-linear conversion support through measurable adapters (temperature formulas use offsets and scaling).
 
 ## UC-wise Implementation
 
@@ -185,6 +188,26 @@ Summary:
 - Centralizes arithmetic operand validation in one method to remove duplicated checks.
 - Preserves UC12 public API signatures and behavior while improving maintainability.
 
+### Implemented (UC14) - Temperature + Selective Arithmetic Support
+
+Files:
+- `QuantityMeasurementApp/IMeasurableUnit.cs`
+- `QuantityMeasurementApp/TemperatureUnit.cs`
+- `QuantityMeasurementApp/TemperatureUnitMeasurable.cs`
+- `QuantityMeasurementApp/UnsupportedOperationException.cs`
+- `QuantityMeasurementApp/MeasurableRegistry.cs`
+- `QuantityMeasurementApp/Quantity.cs`
+- `QuantityMeasurementApp/Program.cs`
+- `QuantityMeasurementApp.Tests/QuantityTests.cs`
+
+Summary:
+- Adds `TemperatureUnit` with `Celsius`, `Fahrenheit`, and `Kelvin`.
+- Adds non-linear temperature conversion formulas via `TemperatureUnitMeasurable`.
+- Refactors `IMeasurableUnit<TUnit>` with default capability methods for arithmetic support checks.
+- Validates operation support in centralized arithmetic paths before add/subtract/divide execution.
+- Blocks temperature arithmetic with clear `UnsupportedOperationException` messages.
+- Preserves UC1-UC13 behavior for length, weight, and volume through backward-compatible defaults.
+
 ## Getting Started
 
 Build:
@@ -213,7 +236,7 @@ dotnet test .\QuantityMeasurementApp.Tests\QuantityMeasurementApp.Tests.csproj
 - `5` Convert weight units
 - `6` Add two weights
 - `7` Run generic quantity demo (UC10+)
-- Option `7` now demonstrates generic equality, conversion, addition, subtraction, and division for length, weight, and volume (UC10-UC13 flow).
+- Option `7` now demonstrates generic equality, conversion, addition, subtraction, and division for length, weight, and volume, plus temperature conversion/equality and unsupported arithmetic handling (UC10-UC14 flow).
 
 ## Notes on Naming
 - In this C# codebase, Java-style names like `QuantityLength`/`QuantityWeight` are represented by `Length`/`Weight`.

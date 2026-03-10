@@ -22,6 +22,11 @@ namespace QuantityMeasurementApp
                 return (IMeasurableUnit<TUnit>)(object)VolumeUnitMeasurable.Instance;
             }
 
+            if (typeof(TUnit) == typeof(TemperatureUnit))
+            {
+                return (IMeasurableUnit<TUnit>)(object)TemperatureUnitMeasurable.Instance;
+            }
+
             throw new ArgumentException($"No measurable adapter registered for unit type '{typeof(TUnit).Name}'.", nameof(TUnit));
         }
     }

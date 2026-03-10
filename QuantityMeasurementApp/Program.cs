@@ -17,7 +17,7 @@ namespace QuantityMeasurementApp
             Console.WriteLine("4. Compare two weights");
             Console.WriteLine("5. Convert weight units");
             Console.WriteLine("6. Add two weights");
-            Console.WriteLine("7. Run generic quantity demo (UC10)");
+            Console.WriteLine("7. Run generic quantity demo (UC10-UC14)");
 
             int option = ReadOption("Choose an option (1-7): ");
 
@@ -262,7 +262,7 @@ namespace QuantityMeasurementApp
 
         private static void DemonstrateGenericQuantityUc10()
         {
-            Console.WriteLine("=== Generic Quantity Demo (UC10/UC11/UC12) ===");
+            Console.WriteLine("=== Generic Quantity Demo (UC10-UC14) ===");
 
             var lengthFeet = new Quantity<LengthUnit>(1.0, LengthUnit.Feet);
             var lengthInch = new Quantity<LengthUnit>(12.0, LengthUnit.Inch);
@@ -311,6 +311,22 @@ namespace QuantityMeasurementApp
 
             var ratioVolume = DemonstrateDivision(volumeLitre, new Quantity<VolumeUnit>(500.0, VolumeUnit.Millilitre));
             Console.WriteLine($"Volume division ratio: {ratioVolume:0.######}");
+
+            var tempCelsius = new Quantity<TemperatureUnit>(0.0, TemperatureUnit.Celsius);
+            var tempFahrenheit = new Quantity<TemperatureUnit>(32.0, TemperatureUnit.Fahrenheit);
+            Console.WriteLine($"Temperature equality (0C == 32F): {DemonstrateEquality(tempCelsius, tempFahrenheit)}");
+
+            var convertedTemp = DemonstrateConversion(new Quantity<TemperatureUnit>(100.0, TemperatureUnit.Celsius), TemperatureUnit.Fahrenheit);
+            Console.WriteLine($"Temperature conversion: {convertedTemp}");
+
+            try
+            {
+                _ = tempCelsius.Add(new Quantity<TemperatureUnit>(10.0, TemperatureUnit.Celsius));
+            }
+            catch (UnsupportedOperationException exception)
+            {
+                Console.WriteLine($"Temperature addition blocked: {exception.Message}");
+            }
         }
     }
 }
