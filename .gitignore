@@ -14,3 +14,5 @@ obj/
 # OS files
 Thumbs.db
 .DS_Store
+
+# dotnet run --project .\QuantityMeasurementApp\QuantityMeasurementApp.csproj

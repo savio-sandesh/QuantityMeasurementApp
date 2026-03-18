@@ -1,3 +1,8 @@
 <Solution>
-  <Project Path="QuantityMeasurementApp.Tests/QuantityMeasurementApp.Tests.csproj" />
+  <Project Path="src/BusinessLayer/BusinessLayer.csproj" />
+  <Project Path="src/ModelLayer/ModelLayer.csproj" />
+  <Project Path="src/QuantityMeasurementDomain/QuantityMeasurementDomain.csproj" />
+  <Project Path="src/QuantityMeasurementApp/QuantityMeasurementApp.csproj" />
+  <Project Path="src/RepositoryLayer/RepositoryLayer.csproj" />
+  <Project Path="test/QuantityMeasurementApp.Tests/QuantityMeasurementApp.Tests.csproj" />
 </Solution>

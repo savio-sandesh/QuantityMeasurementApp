@@ -7,6 +7,8 @@ Small .NET sample: length, weight, volume, and temperature quantities with conve
 - Run commands from repository root: `c:\QuantityMeasurementApp`
 
 ## Features
+- Core quantity types (`Length`, `Weight`, `Quantity<TUnit>`, and unit enums) are implemented in `QuantityMeasurementDomain`.
+- The runnable console application is `src/QuantityMeasurementApp`.
 - `Length` supports equality, conversion, and addition across units (`Feet`, `Inch`, `Yard`, `Centimeter`).
 - `Weight` supports equality, conversion, and addition across units (`Kilogram`, `Gram`, `Pound`).
 - `Volume` supports equality, conversion, and addition across units (`Litre`, `Millilitre`, `Gallon`).
@@ -18,7 +20,7 @@ Small .NET sample: length, weight, volume, and temperature quantities with conve
 - Result in first operand's unit for default `Add(...)` behavior.
 - Explicit target-unit addition overloads.
 - Conversion API: static `Convert()` and instance `ConvertTo()` methods.
-- Tolerance-based equality and normalized `GetHashCode()`.
+- Tolerance-based equality (Length, Weight, and generic Quantity use `0.000001`) and normalized `GetHashCode()`.
 - Non-linear conversion support through measurable adapters (temperature formulas use offsets and scaling).
 
 ## UC-wise Implementation
@@ -219,24 +221,43 @@ dotnet build .\QuantityMeasurementApp.slnx
 Run demo:
 
 ```bash
-dotnet run --project .\QuantityMeasurementApp\QuantityMeasurementApp.csproj
+dotnet run --project .\src\QuantityMeasurementApp\QuantityMeasurementApp.csproj
 ```
 
 Run tests:
 
 ```bash
-dotnet test .\QuantityMeasurementApp.Tests\QuantityMeasurementApp.Tests.csproj
+dotnet test .\test\QuantityMeasurementApp.Tests\QuantityMeasurementApp.Tests.csproj
 ```
 
 ## Console Menu
-- `1` Compare two lengths
-- `2` Convert length units
-- `3` Add two lengths
-- `4` Compare two weights
-- `5` Convert weight units
-- `6` Add two weights
-- `7` Run generic quantity demo (UC10+)
-- Option `7` now demonstrates generic equality, conversion, addition, subtraction, and division for length, weight, and volume, plus temperature conversion/equality and unsupported arithmetic handling (UC10-UC14 flow).
+- Category menu:
+- `1` Length
+- `2` Weight
+- `3` Volume
+- `4` Temperature
+- `0` Exit
+- Operation menu for Length/Weight/Volume:
+- `1` Equality
+- `2` Conversion
+- `3` Addition
+- `4` Subtraction
+- `5` Division
+- `6` Back (returns to category menu)
+- Operation menu for Temperature:
+- `1` Conversion
+- `2` Equality
+- `3` Back (returns to category menu)
+- Unit guidance (shown before each unit input):
+- Length: `Feet`, `Inch`, `Yard`, `Centimeter`
+- Weight: `Kilogram`, `Gram`, `Pound`
+- Volume: `Litre`, `Millilitre`, `Gallon`
+- Temperature: `Celsius`, `Fahrenheit`, `Kelvin`
+- Unit validation:
+- Unit inputs must be unit names (case-insensitive).
+- Numeric unit input (for example `1` or `2`) is rejected with an error.
+- Menu validation:
+- Category and operation selections are validated and re-prompted until a valid option is entered.
 
 ## Notes on Naming
 - In this C# codebase, Java-style names like `QuantityLength`/`QuantityWeight` are represented by `Length`/`Weight`.
