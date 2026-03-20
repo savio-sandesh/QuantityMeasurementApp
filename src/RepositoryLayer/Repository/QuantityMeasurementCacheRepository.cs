@@ -1,5 +1,7 @@
 using ModelLayer;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RepositoryLayer
 {
@@ -22,7 +24,31 @@ namespace RepositoryLayer
 
         public List<QuantityMeasurementEntity> GetAllMeasurements()
         {
-            return cache;
+            return new List<QuantityMeasurementEntity>(cache); // prevent external modification
+        }
+
+        public List<QuantityMeasurementEntity> GetByOperation(string operationType)
+        {
+            return cache
+                .Where(x => string.Equals(x.Operation, operationType, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public List<QuantityMeasurementEntity> GetByType(string measurementType)
+        {
+            return cache
+                .Where(x => string.Equals(x.FirstMeasurementType, measurementType, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public int GetCount()
+        {
+            return cache.Count;
+        }
+
+        public void DeleteAll()
+        {
+            cache.Clear();
         }
     }
 }

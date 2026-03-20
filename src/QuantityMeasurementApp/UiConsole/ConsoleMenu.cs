@@ -3,7 +3,6 @@ using BusinessLayer;
 using ModelLayer;
 using QuantityMeasurementApp.Controllers;
 using QuantityMeasurementDomain.Units;
-using RepositoryLayer;
 
 namespace QuantityMeasurementApp
 {
@@ -11,8 +10,7 @@ namespace QuantityMeasurementApp
     {
         public void DisplayMenu()
         {
-            IQuantityMeasurementRepository repository = QuantityMeasurementCacheRepository.Instance;
-            IQuantityMeasurementService service = new QuantityMeasurementService(repository);
+            IQuantityMeasurementService service = new QuantityMeasurementService();
             var controller = new QuantityMeasurementController(service);
 
             PrintAppHeader();

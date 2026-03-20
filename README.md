@@ -210,6 +210,45 @@ Summary:
 - Blocks temperature arithmetic with clear `UnsupportedOperationException` messages.
 - Preserves UC1-UC13 behavior for length, weight, and volume through backward-compatible defaults.
 
+### Implemented (UC15) - Layered Application Flow with Persistence
+
+Files:
+- `src/QuantityMeasurementApp/Program.cs`
+- `src/QuantityMeasurementApp/Controller/QuantityMeasurementController.cs`
+- `src/BusinessLayer/Services/QuantityMeasurementService.cs`
+- `src/RepositoryLayer/Interface/IQuantityMeasurementRepository.cs`
+- `src/RepositoryLayer/Repository/QuantityMeasurementCacheRepository.cs`
+- `src/RepositoryLayer/Repository/QuantityMeasurementDatabaseRepository.cs`
+- `src/ModelLayer/DTO/QuantityDTO.cs`
+- `src/ModelLayer/Entity/QuantityMeasurementEntity.cs`
+- `src/UtilityLayer/DatabaseConfig.cs`
+- `src/Resources/appsettings.json`
+
+Summary:
+- Introduces end-to-end layered flow: Console UI -> Controller -> Business Service -> Repository.
+- Uses `QuantityDTO` for operation input/output and maps to `QuantityMeasurementEntity` for persistence.
+- Adds repository abstraction so storage can be switched by configuration (`database` or `cache`).
+- Persists operation history (operands, units, result, operation, and measurement type metadata).
+- Keeps business rules in BusinessLayer while persistence concerns stay in RepositoryLayer.
+
+### Implemented (UC16) - Measurement History Query Operations
+
+Files:
+- `src/RepositoryLayer/Interface/IQuantityMeasurementRepository.cs`
+- `src/RepositoryLayer/Repository/QuantityMeasurementCacheRepository.cs`
+- `src/RepositoryLayer/Repository/QuantityMeasurementDatabaseRepository.cs`
+- `src/BusinessLayer/Services/QuantityMeasurementService.cs`
+- `src/UtilityLayer/DatabaseInitializer.cs`
+- `src/SqlTest.sql`
+
+Summary:
+- Extends repository contract with query-oriented methods for saved measurements.
+- Supports full history fetch (`GetAllMeasurements`).
+- Supports filtering by operation (`GetByOperation`) such as `ADD`, `SUBTRACT`, `DIVIDE`, `COMPARE`, `CONVERT`.
+- Supports filtering by measurement category (`GetByType`) such as `length`, `weight`, `volume`, `temperature`.
+- Adds aggregate utility methods: total record count (`GetCount`) and cleanup (`DeleteAll`).
+- Keeps behavior consistent for both cache-backed and database-backed repository implementations.
+
 ## Getting Started
 
 Build:
@@ -223,6 +262,14 @@ Run demo:
 ```bash
 dotnet run --project .\src\QuantityMeasurementApp\QuantityMeasurementApp.csproj
 ```
+
+Configuration:
+- Runtime settings are loaded from `src/RepositoryLayer/appsettings.json`.
+- Keep this file present when running from either the repository root or a project folder.
+- Console operations use `RepositoryType` from this file (`database` persists to SQL Server, `cache` keeps data in memory only).
+- SQL initialization runs only when `RepositoryType` is set to `database`.
+- In `database` mode, startup creates the configured database automatically when it does not exist.
+- Default local SQL Server connection uses `Encrypt=False;TrustServerCertificate=True` for local development compatibility.
 
 Run tests:
 

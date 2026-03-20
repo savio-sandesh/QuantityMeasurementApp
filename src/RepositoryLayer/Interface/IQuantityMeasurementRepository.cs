@@ -8,5 +8,14 @@ namespace RepositoryLayer
         void Save(QuantityMeasurementEntity entity);
 
         List<QuantityMeasurementEntity> GetAllMeasurements();
+
+        // UC16 NEW METHODS
+        List<QuantityMeasurementEntity> GetByOperation(string operationType);
+
+        List<QuantityMeasurementEntity> GetByType(string measurementType);
+
+        int GetCount();
+
+        void DeleteAll();
     }
 }
