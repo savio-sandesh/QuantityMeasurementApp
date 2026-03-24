@@ -13,7 +13,6 @@ The solution is implemented through UC1 to UC16 and includes:
 - .NET SDK 10.0+
 - C# (nullable enabled)
 - SQL Server (optional, for database mode)
-- xUnit test project
 
 ## Current Implementation Status (UC1 to UC16)
 
