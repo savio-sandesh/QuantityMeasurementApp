@@ -7,12 +7,12 @@ namespace RepositoryLayer
     {
         void Save(QuantityMeasurementEntity entity);
 
-        List<QuantityMeasurementEntity> GetAllMeasurements();
+        IReadOnlyList<QuantityMeasurementEntity> GetAllMeasurements();
 
         // UC16 NEW METHODS
-        List<QuantityMeasurementEntity> GetByOperation(string operationType);
+        IReadOnlyList<QuantityMeasurementEntity> GetByOperation(string operationType);
 
-        List<QuantityMeasurementEntity> GetByType(string measurementType);
+        IReadOnlyList<QuantityMeasurementEntity> GetByType(string measurementType);
 
         int GetCount();
 

@@ -2,8 +2,8 @@ using ModelLayer;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
-using UtilityLayer;
 using RepositoryLayer.Exceptions;
+using UtilityLayer;
 
 namespace RepositoryLayer
 {
@@ -11,53 +11,70 @@ namespace RepositoryLayer
     {
         private readonly string connectionString;
 
-        public QuantityMeasurementDatabaseRepository()
+        public QuantityMeasurementDatabaseRepository(string connectionString)
         {
-            connectionString = DatabaseConfig.GetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new ArgumentException("Connection string cannot be null or empty", nameof(connectionString));
+
+            this.connectionString = connectionString;
         }
 
         public void Save(QuantityMeasurementEntity entity)
         {
-            try
+            DatabaseOperationExecutor.Execute(() =>
             {
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = @"INSERT INTO Measurements
-                                (Value1, Unit1, Value2, Unit2, Result, OperationType, MeasurementType)
-                                VALUES (@v1, @u1, @v2, @u2, @res, @op, @type)";
+                using var transaction = connection.BeginTransaction();
 
-                using var cmd = new SqlCommand(query, connection);
+                try
+                {
+                    string query = SqlQueryConstants.InsertMeasurement;
 
-                cmd.Parameters.AddWithValue("@v1", entity.FirstValue);
-                cmd.Parameters.AddWithValue("@u1", entity.FirstUnit);
-                cmd.Parameters.AddWithValue("@v2", entity.SecondValue);
-                cmd.Parameters.AddWithValue("@u2", entity.SecondUnit);
-                cmd.Parameters.AddWithValue("@res", entity.ResultValue);
-                cmd.Parameters.AddWithValue("@op", entity.Operation);
-                cmd.Parameters.AddWithValue("@type", entity.FirstMeasurementType);
+                    using var cmd = new SqlCommand(query, connection, transaction);
 
-                Logger.Info("Executing INSERT query");
-                cmd.ExecuteNonQuery();
-                Logger.Info("Measurement saved successfully");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error saving measurement: " + ex.Message);
-                throw new DatabaseException("Error saving measurement", ex);
-            }
+                    cmd.Parameters.AddWithValue("@v1", entity.FirstValue);
+                    cmd.Parameters.AddWithValue("@u1", entity.FirstUnit);
+                    cmd.Parameters.AddWithValue("@v2", entity.SecondValue);
+                    cmd.Parameters.AddWithValue("@u2", entity.SecondUnit);
+                    cmd.Parameters.AddWithValue("@res", entity.ResultValue);
+                    cmd.Parameters.AddWithValue("@op", entity.Operation);
+                    cmd.Parameters.AddWithValue("@type", entity.FirstMeasurementType);
+
+                    Logger.Info("Executing INSERT query");
+                    cmd.ExecuteNonQuery();
+                    transaction.Commit();
+                    Logger.Info("Measurement saved successfully");
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        transaction.Rollback();
+                        Logger.Info("Transaction rolled back due to save failure");
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Logger.Error("Rollback failed: " + rollbackEx.Message);
+                    }
+
+                    Logger.Error("Error saving measurement: " + ex.Message);
+                    throw;
+                }
+            }, "Error saving measurement");
         }
 
-        public List<QuantityMeasurementEntity> GetAllMeasurements()
+        public IReadOnlyList<QuantityMeasurementEntity> GetAllMeasurements()
         {
-            var list = new List<QuantityMeasurementEntity>();
-
-            try
+            return DatabaseOperationExecutor.Execute(() =>
             {
+                var list = new List<QuantityMeasurementEntity>();
+
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = "SELECT * FROM Measurements";
+                string query = SqlQueryConstants.SelectAllMeasurements;
 
                 using var cmd = new SqlCommand(query, connection);
                 using var reader = cmd.ExecuteReader();
@@ -66,25 +83,20 @@ namespace RepositoryLayer
                 {
                     list.Add(Map(reader));
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException("Error fetching all measurements", ex);
-            }
-
-            return list;
+                return list;
+            }, "Error fetching all measurements");
         }
 
-        public List<QuantityMeasurementEntity> GetByOperation(string operationType)
+        public IReadOnlyList<QuantityMeasurementEntity> GetByOperation(string operationType)
         {
-            var list = new List<QuantityMeasurementEntity>();
-
-            try
+            return DatabaseOperationExecutor.Execute(() =>
             {
+                var list = new List<QuantityMeasurementEntity>();
+
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = "SELECT * FROM Measurements WHERE OperationType=@op";
+                string query = SqlQueryConstants.SelectByOperation;
 
                 using var cmd = new SqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@op", operationType);
@@ -95,25 +107,20 @@ namespace RepositoryLayer
                 {
                     list.Add(Map(reader));
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException("Error fetching by operation", ex);
-            }
-
-            return list;
+                return list;
+            }, "Error fetching by operation");
         }
 
-        public List<QuantityMeasurementEntity> GetByType(string measurementType)
+        public IReadOnlyList<QuantityMeasurementEntity> GetByType(string measurementType)
         {
-            var list = new List<QuantityMeasurementEntity>();
-
-            try
+            return DatabaseOperationExecutor.Execute(() =>
             {
+                var list = new List<QuantityMeasurementEntity>();
+
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = "SELECT * FROM Measurements WHERE MeasurementType=@type";
+                string query = SqlQueryConstants.SelectByType;
 
                 using var cmd = new SqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@type", measurementType);
@@ -124,66 +131,53 @@ namespace RepositoryLayer
                 {
                     list.Add(Map(reader));
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException("Error fetching by type", ex);
-            }
-
-            return list;
+                return list;
+            }, "Error fetching by type");
         }
 
         public int GetCount()
         {
-            try
+            return DatabaseOperationExecutor.Execute(() =>
             {
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = "SELECT COUNT(*) FROM Measurements";
+                string query = SqlQueryConstants.SelectCount;
 
                 using var cmd = new SqlCommand(query, connection);
 
                 return (int)cmd.ExecuteScalar();
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException("Error getting count", ex);
-            }
+            }, "Error getting count");
         }
 
         public void DeleteAll()
         {
-            try
+            DatabaseOperationExecutor.Execute(() =>
             {
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
 
-                string query = "DELETE FROM Measurements";
+                string query = SqlQueryConstants.DeleteAllMeasurements;
 
                 using var cmd = new SqlCommand(query, connection);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                throw new DatabaseException("Error deleting all data", ex);
-            }
+            }, "Error deleting all data");
         }
 
         private QuantityMeasurementEntity Map(SqlDataReader reader)
         {
             return new QuantityMeasurementEntity
             {
-                FirstValue = Convert.ToDouble(reader["Value1"]),
-                FirstUnit = reader["Unit1"]?.ToString() ?? string.Empty,
-                FirstMeasurementType = reader["MeasurementType"]?.ToString() ?? string.Empty,
-                SecondValue = Convert.ToDouble(reader["Value2"]),
-                SecondUnit = reader["Unit2"]?.ToString() ?? string.Empty,
-                SecondMeasurementType = reader["MeasurementType"]?.ToString() ?? string.Empty,
-                ResultValue = reader["Result"]?.ToString() ?? string.Empty,
+                FirstValue = Convert.ToDouble(reader[SqlColumnConstants.Value1]),
+                FirstUnit = reader[SqlColumnConstants.Unit1]?.ToString() ?? string.Empty,
+                FirstMeasurementType = reader[SqlColumnConstants.MeasurementType]?.ToString() ?? string.Empty,
+                SecondValue = Convert.ToDouble(reader[SqlColumnConstants.Value2]),
+                SecondUnit = reader[SqlColumnConstants.Unit2]?.ToString() ?? string.Empty,
+                SecondMeasurementType = reader[SqlColumnConstants.MeasurementType]?.ToString() ?? string.Empty,
+                ResultValue = reader[SqlColumnConstants.Result]?.ToString() ?? string.Empty,
                 ResultUnit = string.Empty,
-                ResultMeasurementType = reader["MeasurementType"]?.ToString() ?? string.Empty,
-                Operation = reader["OperationType"]?.ToString() ?? string.Empty,
+                ResultMeasurementType = reader[SqlColumnConstants.MeasurementType]?.ToString() ?? string.Empty,
+                Operation = reader[SqlColumnConstants.OperationType]?.ToString() ?? string.Empty,
                 IsError = false,
                 ErrorMessage = string.Empty
             };

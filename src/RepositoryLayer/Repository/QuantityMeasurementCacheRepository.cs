@@ -22,19 +22,19 @@ namespace RepositoryLayer
             cache.Add(entity);
         }
 
-        public List<QuantityMeasurementEntity> GetAllMeasurements()
+        public IReadOnlyList<QuantityMeasurementEntity> GetAllMeasurements()
         {
             return new List<QuantityMeasurementEntity>(cache); // prevent external modification
         }
 
-        public List<QuantityMeasurementEntity> GetByOperation(string operationType)
+        public IReadOnlyList<QuantityMeasurementEntity> GetByOperation(string operationType)
         {
             return cache
                 .Where(x => string.Equals(x.Operation, operationType, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
-        public List<QuantityMeasurementEntity> GetByType(string measurementType)
+        public IReadOnlyList<QuantityMeasurementEntity> GetByType(string measurementType)
         {
             return cache
                 .Where(x => string.Equals(x.FirstMeasurementType, measurementType, StringComparison.OrdinalIgnoreCase))

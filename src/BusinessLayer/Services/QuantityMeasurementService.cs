@@ -1,7 +1,6 @@
 using System;
 using ModelLayer;
 using QuantityMeasurementDomain;
-using QuantityMeasurementDomain.Units;
 using RepositoryLayer;
 using UtilityLayer;
 
@@ -22,8 +21,8 @@ namespace BusinessLayer
         {
             var repoType = DatabaseConfig.GetRepositoryType();
 
-            if (repoType.Equals("database", StringComparison.OrdinalIgnoreCase))
-                return new QuantityMeasurementDatabaseRepository();
+            if (repoType.Equals(RepositoryTypeConstants.Database, StringComparison.OrdinalIgnoreCase))
+                return new QuantityMeasurementDatabaseRepository(DatabaseConfig.GetConnectionString());
 
             return QuantityMeasurementCacheRepository.Instance;
         }
@@ -39,19 +38,12 @@ namespace BusinessLayer
 
             bool result = a.Equals(b);
 
-            var entity = new QuantityMeasurementEntity
-            {
-                FirstValue = q1.Value,
-                FirstUnit = q1.Unit,
-                FirstMeasurementType = q1.MeasurementType,
-                SecondValue = q2.Value,
-                SecondUnit = q2.Unit,
-                ResultValue = result.ToString(),
-                ResultUnit = string.Empty,
-                Operation = "COMPARE",
-                IsError = false,
-                ErrorMessage = string.Empty
-            };
+            var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
+                q1,
+                q2,
+                OperationTypeConstants.Compare,
+                result.ToString(),
+                string.Empty);
 
             repository.Save(entity);
 
@@ -71,19 +63,12 @@ namespace BusinessLayer
 
             var result = a.Add(b, ParseTargetUnit(targetUnit, q1.MeasurementType));
 
-            var entity = new QuantityMeasurementEntity
-            {
-                FirstValue = q1.Value,
-                FirstUnit = q1.Unit,
-                FirstMeasurementType = q1.MeasurementType,
-                SecondValue = q2.Value,
-                SecondUnit = q2.Unit,
-                ResultValue = result.Value.ToString(),
-                ResultUnit = targetUnit,
-                Operation = "ADD",
-                IsError = false,
-                ErrorMessage = string.Empty
-            };
+            var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
+                q1,
+                q2,
+                OperationTypeConstants.Add,
+                result.Value.ToString(),
+                targetUnit);
 
             repository.Save(entity);
 
@@ -103,19 +88,12 @@ namespace BusinessLayer
 
             var result = a.Subtract(b, ParseTargetUnit(targetUnit, q1.MeasurementType));
 
-            var entity = new QuantityMeasurementEntity
-            {
-                FirstValue = q1.Value,
-                FirstUnit = q1.Unit,
-                FirstMeasurementType = q1.MeasurementType,
-                SecondValue = q2.Value,
-                SecondUnit = q2.Unit,
-                ResultValue = result.Value.ToString(),
-                ResultUnit = targetUnit,
-                Operation = "SUBTRACT",
-                IsError = false,
-                ErrorMessage = string.Empty
-            };
+            var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
+                q1,
+                q2,
+                OperationTypeConstants.Subtract,
+                result.Value.ToString(),
+                targetUnit);
 
             repository.Save(entity);
 
@@ -135,19 +113,12 @@ namespace BusinessLayer
 
             double result = a.Divide(b);
 
-            var entity = new QuantityMeasurementEntity
-            {
-                FirstValue = q1.Value,
-                FirstUnit = q1.Unit,
-                FirstMeasurementType = q1.MeasurementType,
-                SecondValue = q2.Value,
-                SecondUnit = q2.Unit,
-                ResultValue = result.ToString(),
-                ResultUnit = string.Empty,
-                Operation = "DIVIDE",
-                IsError = false,
-                ErrorMessage = string.Empty
-            };
+            var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
+                q1,
+                q2,
+                OperationTypeConstants.Divide,
+                result.ToString(),
+                string.Empty);
 
             repository.Save(entity);
 
@@ -164,19 +135,10 @@ namespace BusinessLayer
 
             var result = ConvertToTarget(q, targetUnit, quantity.MeasurementType);
 
-            var entity = new QuantityMeasurementEntity
-            {
-                FirstValue = quantity.Value,
-                FirstUnit = quantity.Unit,
-                FirstMeasurementType = quantity.MeasurementType,
-                SecondValue = 0,
-                SecondUnit = targetUnit,
-                ResultValue = result.Value.ToString(),
-                ResultUnit = targetUnit,
-                Operation = "CONVERT",
-                IsError = false,
-                ErrorMessage = string.Empty
-            };
+            var entity = QuantityMeasurementEntityFactory.CreateConversionOperation(
+                quantity,
+                targetUnit,
+                result.Value.ToString());
 
             repository.Save(entity);
 
@@ -189,78 +151,23 @@ namespace BusinessLayer
 
         private static void ValidateType(QuantityDTO q1, QuantityDTO q2)
         {
-            if (q1.MeasurementType != q2.MeasurementType)
+            if (!string.Equals(q1.MeasurementType, q2.MeasurementType, StringComparison.OrdinalIgnoreCase))
                 throw new QuantityMeasurementException("Different measurement types cannot be compared");
         }
 
         private static dynamic ParseTargetUnit(string unit, string type)
         {
-            return type.ToLower() switch
-            {
-                "length" => Enum.Parse<LengthUnit>(unit, true),
-                "weight" => Enum.Parse<WeightUnit>(unit, true),
-                "volume" => Enum.Parse<VolumeUnit>(unit, true),
-                "temperature" => Enum.Parse<TemperatureUnit>(unit, true),
-                _ => throw new QuantityMeasurementException("Unsupported measurement type")
-            };
+            return MeasurementTypeDispatcher.ParseTargetUnit(unit, type);
         }
 
         private static dynamic CreateQuantity(QuantityDTO dto)
         {
-            switch (dto.MeasurementType.ToLower())
-            {
-                case "length":
-                    if (!Enum.TryParse<LengthUnit>(dto.Unit, true, out var lUnit))
-                        throw new QuantityMeasurementException($"Invalid length unit: {dto.Unit}");
-                    return new Quantity<LengthUnit>(dto.Value, lUnit);
-
-                case "weight":
-                    if (!Enum.TryParse<WeightUnit>(dto.Unit, true, out var wUnit))
-                        throw new QuantityMeasurementException($"Invalid weight unit: {dto.Unit}");
-                    return new Quantity<WeightUnit>(dto.Value, wUnit);
-
-                case "volume":
-                    if (!Enum.TryParse<VolumeUnit>(dto.Unit, true, out var vUnit))
-                        throw new QuantityMeasurementException($"Invalid volume unit: {dto.Unit}");
-                    return new Quantity<VolumeUnit>(dto.Value, vUnit);
-
-                case "temperature":
-                    if (!Enum.TryParse<TemperatureUnit>(dto.Unit, true, out var tUnit))
-                        throw new QuantityMeasurementException($"Invalid temperature unit: {dto.Unit}");
-                    return new Quantity<TemperatureUnit>(dto.Value, tUnit);
-
-                default:
-                    throw new QuantityMeasurementException($"Unsupported measurement type: {dto.MeasurementType}");
-            }
+            return MeasurementTypeDispatcher.CreateQuantity(dto);
         }
 
         private static dynamic ConvertToTarget(dynamic quantity, string targetUnit, string type)
         {
-            switch (type.ToLower())
-            {
-                case "length":
-                    if (!Enum.TryParse<LengthUnit>(targetUnit, true, out var lUnit))
-                        throw new QuantityMeasurementException($"Invalid target unit: {targetUnit}");
-                    return quantity.ConvertTo(lUnit);
-
-                case "weight":
-                    if (!Enum.TryParse<WeightUnit>(targetUnit, true, out var wUnit))
-                        throw new QuantityMeasurementException($"Invalid target unit: {targetUnit}");
-                    return quantity.ConvertTo(wUnit);
-
-                case "volume":
-                    if (!Enum.TryParse<VolumeUnit>(targetUnit, true, out var vUnit))
-                        throw new QuantityMeasurementException($"Invalid target unit: {targetUnit}");
-                    return quantity.ConvertTo(vUnit);
-
-                case "temperature":
-                    if (!Enum.TryParse<TemperatureUnit>(targetUnit, true, out var tUnit))
-                        throw new QuantityMeasurementException($"Invalid target unit: {targetUnit}");
-                    return quantity.ConvertTo(tUnit);
-
-                default:
-                    throw new QuantityMeasurementException($"Unsupported measurement type: {type}");
-            }
+            return MeasurementTypeDispatcher.ConvertToTarget(quantity, targetUnit, type);
         }
 
         private static QuantityDTO CreateDTO(dynamic quantity, string type)

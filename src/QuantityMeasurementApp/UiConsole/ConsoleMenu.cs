@@ -296,14 +296,19 @@ namespace QuantityMeasurementApp
 
         private static string[] GetAllowedUnits(string? type)
         {
-            return (type ?? string.Empty).ToLowerInvariant() switch
-            {
-                "length" => Enum.GetNames<LengthUnit>(),
-                "weight" => Enum.GetNames<WeightUnit>(),
-                "volume" => Enum.GetNames<VolumeUnit>(),
-                "temperature" => Enum.GetNames<TemperatureUnit>(),
-                _ => Array.Empty<string>()
-            };
+            if (string.Equals(type, MeasurementTypeConstants.Length, StringComparison.OrdinalIgnoreCase))
+                return Enum.GetNames<LengthUnit>();
+
+            if (string.Equals(type, MeasurementTypeConstants.Weight, StringComparison.OrdinalIgnoreCase))
+                return Enum.GetNames<WeightUnit>();
+
+            if (string.Equals(type, MeasurementTypeConstants.Volume, StringComparison.OrdinalIgnoreCase))
+                return Enum.GetNames<VolumeUnit>();
+
+            if (string.Equals(type, MeasurementTypeConstants.Temperature, StringComparison.OrdinalIgnoreCase))
+                return Enum.GetNames<TemperatureUnit>();
+
+            return Array.Empty<string>();
         }
     }
 }

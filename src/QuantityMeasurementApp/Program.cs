@@ -17,7 +17,7 @@ namespace QuantityMeasurementApp
                 Logger.Info("Application starting...");
 
                 var repositoryType = DatabaseConfig.GetRepositoryType();
-                if (repositoryType.Equals("database", StringComparison.OrdinalIgnoreCase))
+                if (repositoryType.Equals(RepositoryTypeConstants.Database, StringComparison.OrdinalIgnoreCase))
                 {
                     DatabaseInitializer.Initialize();
                     Logger.Info("Database initialized successfully");
