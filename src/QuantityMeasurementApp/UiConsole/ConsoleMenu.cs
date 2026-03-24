@@ -10,7 +10,7 @@ namespace QuantityMeasurementApp
     {
         public void DisplayMenu()
         {
-            IQuantityMeasurementService service = new QuantityMeasurementService();
+            IQuantityMeasurementService service = QuantityServiceFactory.CreateService();
             var controller = new QuantityMeasurementController(service);
 
             PrintAppHeader();
@@ -109,20 +109,20 @@ namespace QuantityMeasurementApp
                                 }
 
                                 var converted = controller.Convert(q1, target);
-                                PrintResult($"Converted: {converted.Value} {converted.Unit}");
+                                PrintResult($"Converted: {converted.ResultValue} {converted.ResultUnit}");
                             }
                             else
                             {
-                                bool result = controller.Compare(q1, q2!);
-                                PrintResult($"Equal: {result}");
+                                var result = controller.Compare(q1, q2!);
+                                PrintResult($"Equal: {result.ResultString}");
                             }
                             break;
 
                         case "2":
                             if (isTemperature)
                             {
-                                bool result = controller.Compare(q1, q2!);
-                                PrintResult($"Equal: {result}");
+                                var result = controller.Compare(q1, q2!);
+                                PrintResult($"Equal: {result.ResultString}");
                             }
                             else
                             {
@@ -133,7 +133,7 @@ namespace QuantityMeasurementApp
                                 }
 
                                 var converted = controller.Convert(q1, target);
-                                PrintResult($"Converted: {converted.Value} {converted.Unit}");
+                                PrintResult($"Converted: {converted.ResultValue} {converted.ResultUnit}");
                             }
                             break;
 
@@ -145,7 +145,7 @@ namespace QuantityMeasurementApp
                             }
 
                             var sum = controller.Add(q1, q2!, addTarget);
-                            PrintResult($"Result: {sum.Value} {sum.Unit}");
+                            PrintResult($"Result: {sum.ResultValue} {sum.ResultUnit}");
                             break;
 
                         case "4":
@@ -156,12 +156,12 @@ namespace QuantityMeasurementApp
                             }
 
                             var difference = controller.Subtract(q1, q2!, subtractTarget);
-                            PrintResult($"Result: {difference.Value} {difference.Unit}");
+                            PrintResult($"Result: {difference.ResultValue} {difference.ResultUnit}");
                             break;
 
                         case "5":
                             var ratio = controller.Divide(q1, q2!);
-                            PrintResult($"Result: {ratio}");
+                            PrintResult($"Result: {ratio.ResultString}");
                             break;
                     }
                 }

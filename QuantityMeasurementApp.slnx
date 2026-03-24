@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/QuantityMeasurement.Tests/QuantityMeasurement.Tests.csproj" />
+    <Project Path="src/QuantityMeasurementWebApi/QuantityMeasurementWebApi.csproj" />
+  </Folder>
+  <Project Path="QuantityMeasurementWebApi/QuantityMeasurementWebApi.csproj" />
   <Project Path="src/BusinessLayer/BusinessLayer.csproj" />
   <Project Path="src/ModelLayer/ModelLayer.csproj" />
   <Project Path="src/QuantityMeasurementDomain/QuantityMeasurementDomain.csproj" />

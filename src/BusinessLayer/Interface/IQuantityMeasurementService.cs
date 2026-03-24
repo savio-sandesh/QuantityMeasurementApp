@@ -4,13 +4,21 @@ namespace BusinessLayer
 {
     public interface IQuantityMeasurementService
     {
-        bool Compare(QuantityDTO q1, QuantityDTO q2);
+        QuantityMeasurementDTO Compare(QuantityDTO q1, QuantityDTO q2);
 
-        QuantityDTO Convert(QuantityDTO quantity, string targetUnit);
+        QuantityMeasurementDTO Convert(QuantityDTO quantity, string targetUnit);
 
 
-        double Divide(QuantityDTO q1, QuantityDTO q2);
-        QuantityDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit);
-        QuantityDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit);
+        QuantityMeasurementDTO Divide(QuantityDTO q1, QuantityDTO q2);
+        QuantityMeasurementDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit);
+        QuantityMeasurementDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit);
+
+        List<QuantityMeasurementDTO> GetOperationHistory(string operation);
+
+        List<QuantityMeasurementDTO> GetMeasurementsByType(string type);
+
+        int GetOperationCount(string operation);
+
+        List<QuantityMeasurementDTO> GetErroredOperations();
     }
 }

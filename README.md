@@ -13,8 +13,10 @@ The solution is implemented through UC1 to UC16 and includes:
 - .NET SDK 10.0+
 - C# (nullable enabled)
 - SQL Server (optional, for database mode)
+- ASP.NET Core Web API (in `src/QuantityMeasurementWebApi`)
+- Entity Framework Core SQL Server provider (`Microsoft.EntityFrameworkCore.SqlServer`)
 
-## Current Implementation Status (UC1 to UC16)
+## Current Implementation Status (UC1 to UC17)
 
 ### UC1 to UC8: Length Foundations and Arithmetic
 - Length equality and inequality behavior.
@@ -58,6 +60,12 @@ The solution is implemented through UC1 to UC16 and includes:
 	- DeleteAll
 - Implemented consistently in both cache and database repositories.
 
+### UC17: REST API + Global Exception Handling
+- Added ASP.NET Core Web API endpoints under `/api/v1/quantities`.
+- Added API DTO contracts for request and response payloads.
+- Added centralized global exception middleware returning structured `ErrorResponse` JSON.
+- Added xUnit API test project setup with Moq, ASP.NET Core MVC Testing, and FluentAssertions.
+
 ## Architecture
 
 ### Layers
@@ -83,18 +91,61 @@ src/
 	RepositoryLayer/              # Repository interface, cache/db implementations, config
 	BusinessLayer/                # Service, operation dispatch, entity factory
 	QuantityMeasurementApp/       # Console UI, controller, entry point
+	QuantityMeasurementWebApi/    # Web API host project (includes EF Core DbContext)
+	QuantityMeasurement.Tests/    # xUnit test project for Web API and service-layer testing
 test/
 	QuantityMeasurementApp.Tests/ # Automated tests
 ```
+
+Web API model contracts include request/response DTOs in `src/QuantityMeasurementWebApi/Models`:
+- `QuantityDTO`
+- `QuantityInputDTO`
+- `QuantityMeasurementDTO`
+
+Web API endpoints are exposed under `/api/v1/quantities` for:
+- `POST /compare`
+- `POST /convert`
+- `POST /add`
+- `POST /subtract`
+- `POST /divide`
+- `GET /history/operation/{operationType}`
+- `GET /history/type/{measurementType}`
+- `GET /count`
+
+Web API uses centralized global exception handling middleware (`GlobalExceptionMiddleware`) that returns structured JSON error responses (`ErrorResponse`) for domain and unexpected exceptions.
+
+## Current Implementation Status (UC1 to UC17)
+
+| UC | Area | Changelog Summary |
+| --- | --- | --- |
+| UC1 | Length Equality | Added core length equality and inequality behavior. |
+| UC2 | Length Units | Added multi-unit length support: Feet, Inch, Yard, Centimeter. |
+| UC3 | Length Conversion | Added length conversion support across units. |
+| UC4 | Length API Refinement | Improved conversion API usability and internal conversion flow. |
+| UC5 | Length Addition | Added length addition for same and cross-unit values. |
+| UC6 | Length Target Unit Addition | Added addition with explicit target unit selection. |
+| UC7 | Length Cleanup | Refactored length logic for clearer separation and maintainability. |
+| UC8 | Length Stabilization | Finalized length behavior and arithmetic consistency checks. |
+| UC9 | Weight Category | Added Weight with Kilogram, Gram, Pound and aligned arithmetic/conversion behavior. |
+| UC10 | Generic Quantity Engine | Introduced generic Quantity<TUnit> and centralized measurable adapter model. |
+| UC11 | Volume Category | Added Volume with Litre, Millilitre, Gallon within generic quantity architecture. |
+| UC12 | Extended Arithmetic | Added Subtract operation and shared arithmetic dispatch path. |
+| UC13 | DRY Arithmetic Refactor | Added Divide and consolidated arithmetic validation/dispatch logic. |
+| UC14 | Temperature Constraints | Added Celsius/Fahrenheit/Kelvin with non-linear conversion and blocked unsupported arithmetic. |
+| UC15 | Layered Persistence | Implemented DTO/entity layering, repository abstraction, and database-mode initialization path. |
+| UC16 | History Query Operations | Added GetAllMeasurements, GetByOperation, GetByType, GetCount, DeleteAll in cache and database repositories. |
+| UC17 | REST API + Global Error Handling | Added Web API endpoints, API DTOs, centralized GlobalExceptionMiddleware with ErrorResponse JSON, and API test project setup. |
 
 ## Configuration
 
 Configuration file:
 - src/RepositoryLayer/appsettings.json
+- src/QuantityMeasurementWebApi/appsettings.json
 
 Key settings:
 - RepositoryType: database or cache
 - ConnectionStrings.DefaultConnection: SQL Server connection string
+- Web API EF Core also uses ConnectionStrings.DefaultConnection for QuantityDbContext
 
 Behavior:
 - If RepositoryType is database, startup runs database initialization.
@@ -125,6 +176,11 @@ dotnet test .\test\QuantityMeasurementApp.Tests\QuantityMeasurementApp.Tests.csp
 Latest verified result:
 - 121 tests passed.
 
+Additional API testing dependencies are configured in `src/QuantityMeasurement.Tests`:
+- `Moq`
+- `Microsoft.AspNetCore.Mvc.Testing`
+- `FluentAssertions`
+
 ## Console Capabilities
 
 ### Categories
@@ -142,15 +198,23 @@ Latest verified result:
 
 Temperature supports conversion and equality; unsupported arithmetic is intentionally blocked.
 
+Business service API now returns `QuantityMeasurementDTO` for operation endpoints (compare, convert, add, subtract, divide), and supports history/query operations:
+- `GetOperationHistory(string operation)`
+- `GetMeasurementsByType(string type)`
+- `GetOperationCount(string operation)`
+- `GetErroredOperations()`
+
 ## Repository and Data Notes
 
 Database repository supports transactional save behavior to protect data consistency.
+Database repository operations now use EF Core (`QuantityDbContext`) and LINQ queries instead of raw ADO.NET commands.
 
 History records store:
 - Operand values and units
 - Measurement type
 - Operation name
 - Result value and result unit
+- CreatedAt timestamp initialized at entity construction time
 
 Helper SQL script:
 - src/RepositoryLayer/SqlTest.sql
@@ -163,7 +227,6 @@ Recent clean-code refactors include:
 - Centralized measurement type dispatch logic.
 - Centralized repository exception wrapping.
 - Centralized entity creation for operation persistence records.
+- EF-ready `QuantityMeasurementEntity` annotations for table/column/key mapping (`Measurements`, `Id`, `Value1`, `Unit1`, `Value2`, `Unit2`, `Result`, `OperationType`, `MeasurementType`, `CreatedAt`).
 
-## README Maintenance Rule
 
-For every future change affecting behavior, API, units, tests, architecture, or configuration, update this README in the same change.

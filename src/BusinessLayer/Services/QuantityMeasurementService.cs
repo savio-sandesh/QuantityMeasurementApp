@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using ModelLayer;
 using QuantityMeasurementDomain;
 using RepositoryLayer;
@@ -15,19 +17,7 @@ namespace BusinessLayer
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public QuantityMeasurementService() : this(GetRepository()) { }
-
-        private static IQuantityMeasurementRepository GetRepository()
-        {
-            var repoType = DatabaseConfig.GetRepositoryType();
-
-            if (repoType.Equals(RepositoryTypeConstants.Database, StringComparison.OrdinalIgnoreCase))
-                return new QuantityMeasurementDatabaseRepository(DatabaseConfig.GetConnectionString());
-
-            return QuantityMeasurementCacheRepository.Instance;
-        }
-
-        public bool Compare(QuantityDTO q1, QuantityDTO q2)
+        public QuantityMeasurementDTO Compare(QuantityDTO q1, QuantityDTO q2)
         {
             Logger.Info("Comparing quantities");
 
@@ -37,22 +27,23 @@ namespace BusinessLayer
             dynamic b = CreateQuantity(q2);
 
             bool result = a.Equals(b);
+            string resultText = result.ToString();
 
             var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
                 q1,
                 q2,
                 OperationTypeConstants.Compare,
-                result.ToString(),
+                resultText,
                 string.Empty);
 
             repository.Save(entity);
 
             Logger.Debug($"Compare result: {result}");
 
-            return result;
+            return MapToQuantityMeasurementDto(entity, resultText, string.Empty, resultText);
         }
 
-        public QuantityDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit)
+        public QuantityMeasurementDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit)
         {
             Logger.Info("Performing ADD operation");
 
@@ -62,22 +53,23 @@ namespace BusinessLayer
             dynamic b = CreateQuantity(q2);
 
             var result = a.Add(b, ParseTargetUnit(targetUnit, q1.MeasurementType));
+            string resultValue = result.Value.ToString();
 
             var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
                 q1,
                 q2,
                 OperationTypeConstants.Add,
-                result.Value.ToString(),
+                resultValue,
                 targetUnit);
 
             repository.Save(entity);
 
             Logger.Debug($"Add result: {result.Value}");
 
-            return CreateDTO(result, q1.MeasurementType);
+            return MapToQuantityMeasurementDto(entity, resultValue, targetUnit, resultValue);
         }
 
-        public QuantityDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit)
+        public QuantityMeasurementDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit)
         {
             Logger.Info("Performing SUBTRACT operation");
 
@@ -87,22 +79,23 @@ namespace BusinessLayer
             dynamic b = CreateQuantity(q2);
 
             var result = a.Subtract(b, ParseTargetUnit(targetUnit, q1.MeasurementType));
+            string resultValue = result.Value.ToString();
 
             var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
                 q1,
                 q2,
                 OperationTypeConstants.Subtract,
-                result.Value.ToString(),
+                resultValue,
                 targetUnit);
 
             repository.Save(entity);
 
             Logger.Debug($"Subtract result: {result.Value}");
 
-            return CreateDTO(result, q1.MeasurementType);
+            return MapToQuantityMeasurementDto(entity, resultValue, targetUnit, resultValue);
         }
 
-        public double Divide(QuantityDTO q1, QuantityDTO q2)
+        public QuantityMeasurementDTO Divide(QuantityDTO q1, QuantityDTO q2)
         {
             Logger.Info("Performing DIVIDE operation");
 
@@ -112,39 +105,67 @@ namespace BusinessLayer
             dynamic b = CreateQuantity(q2);
 
             double result = a.Divide(b);
+            string resultText = result.ToString();
 
             var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
                 q1,
                 q2,
                 OperationTypeConstants.Divide,
-                result.ToString(),
+                resultText,
                 string.Empty);
 
             repository.Save(entity);
 
             Logger.Debug($"Divide result: {result}");
 
-            return result;
+            return MapToQuantityMeasurementDto(entity, resultText, string.Empty, resultText);
         }
 
-        public QuantityDTO Convert(QuantityDTO quantity, string targetUnit)
+        public QuantityMeasurementDTO Convert(QuantityDTO quantity, string targetUnit)
         {
             Logger.Info("Performing CONVERT operation");
 
             dynamic q = CreateQuantity(quantity);
 
             var result = ConvertToTarget(q, targetUnit, quantity.MeasurementType);
+            string resultValue = result.Value.ToString();
 
             var entity = QuantityMeasurementEntityFactory.CreateConversionOperation(
                 quantity,
                 targetUnit,
-                result.Value.ToString());
+                resultValue);
 
             repository.Save(entity);
 
             Logger.Debug($"Convert result: {result.Value}");
 
-            return CreateDTO(result, quantity.MeasurementType);
+            return MapToQuantityMeasurementDto(entity, resultValue, targetUnit, resultValue);
+        }
+
+        public List<QuantityMeasurementDTO> GetOperationHistory(string operation)
+        {
+            var entities = repository.GetByOperation(operation);
+            return entities.Select(MapFromEntity).ToList();
+        }
+
+        public List<QuantityMeasurementDTO> GetMeasurementsByType(string type)
+        {
+            var entities = repository.GetByType(type);
+            return entities.Select(MapFromEntity).ToList();
+        }
+
+        public int GetOperationCount(string operation)
+        {
+            return repository.GetByOperation(operation).Count;
+        }
+
+        public List<QuantityMeasurementDTO> GetErroredOperations()
+        {
+            var entities = repository.GetAllMeasurements();
+            return entities
+                .Where(x => x.IsError)
+                .Select(MapFromEntity)
+                .ToList();
         }
 
         // ---------------- HELPERS ----------------
@@ -170,13 +191,46 @@ namespace BusinessLayer
             return MeasurementTypeDispatcher.ConvertToTarget(quantity, targetUnit, type);
         }
 
-        private static QuantityDTO CreateDTO(dynamic quantity, string type)
+        private static QuantityMeasurementDTO MapToQuantityMeasurementDto(
+            QuantityMeasurementEntity entity,
+            string resultValue,
+            string resultUnit,
+            string resultString)
         {
-            return new QuantityDTO(
-                quantity.Value,
-                quantity.Unit.ToString(),
-                type
-            );
+            return new QuantityMeasurementDTO
+            {
+                ThisValue = entity.FirstValue,
+                ThisUnit = entity.FirstUnit,
+                ThisMeasurementType = entity.FirstMeasurementType,
+                ThatValue = entity.SecondValue,
+                ThatUnit = entity.SecondUnit,
+                ThatMeasurementType = entity.SecondMeasurementType,
+                ResultValue = resultValue,
+                ResultUnit = resultUnit,
+                ResultString = resultString,
+                Operation = entity.Operation,
+                IsError = entity.IsError,
+                ErrorMessage = entity.ErrorMessage
+            };
+        }
+
+        private static QuantityMeasurementDTO MapFromEntity(QuantityMeasurementEntity entity)
+        {
+            return new QuantityMeasurementDTO
+            {
+                ThisValue = entity.FirstValue,
+                ThisUnit = entity.FirstUnit,
+                ThisMeasurementType = entity.FirstMeasurementType,
+                ThatValue = entity.SecondValue,
+                ThatUnit = entity.SecondUnit,
+                ThatMeasurementType = entity.SecondMeasurementType,
+                ResultValue = entity.ResultValue,
+                ResultUnit = entity.ResultUnit,
+                ResultString = entity.ResultValue,
+                Operation = entity.Operation,
+                IsError = entity.IsError,
+                ErrorMessage = entity.ErrorMessage
+            };
         }
     }
 }

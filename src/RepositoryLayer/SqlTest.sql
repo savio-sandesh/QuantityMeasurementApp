@@ -1,4 +1,3 @@
 Use QuantityMeasurementAppDB;
 
-SELECT * FROM Measurements;
-
+SELECT TOP 1 * FROM Measurements ORDER BY CreatedAt DESC;
