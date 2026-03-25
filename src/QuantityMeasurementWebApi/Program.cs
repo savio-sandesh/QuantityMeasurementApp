@@ -11,7 +11,7 @@ builder.Services.AddDbContext<QuantityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Register Repository and Service (Phase 4 - Dependency Injection)
-// Isse framework ko pata chalega ki jab koi IQuantityMeasurementService maange toh use kaunsi class deni hai.
+// Note: Ensure that QuantityMeasurementDatabaseRepository and QuantityMeasurementService are implemented in the RepositoryLayer and BusinessLayer projects respectively, and that they implement the IQuantityMeasurementRepository and IQuantityMeasurementService interfaces.
 builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementDatabaseRepository>();
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementService>();
 
@@ -37,3 +37,5 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
 
 app.Run();
+
+// dotnet run --project .\src\QuantityMeasurementWebApi\QuantityMeasurementWebApi.csproj

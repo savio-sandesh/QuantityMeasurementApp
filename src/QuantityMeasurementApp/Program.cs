@@ -39,3 +39,6 @@ namespace QuantityMeasurementApp
         }
     }
 }
+
+
+// dotnet run --project .\src\QuantityMeasurementApp\QuantityMeasurementApp.csproj
