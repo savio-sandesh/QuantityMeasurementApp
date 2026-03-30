@@ -83,6 +83,18 @@ namespace RepositoryLayer
             }, "Error fetching by type");
         }
 
+        public IReadOnlyList<QuantityMeasurementEntity> GetHistoryByUserId(int userId)
+        {
+            return DatabaseOperationExecutor.Execute(() =>
+            {
+                return _context.Measurements
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToList()
+                    .AsReadOnly();
+            }, "Error fetching history by user id");
+        }
+
         public int GetCount()
         {
             return DatabaseOperationExecutor.Execute(() =>

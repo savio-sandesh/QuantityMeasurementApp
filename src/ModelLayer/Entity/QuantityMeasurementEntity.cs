@@ -33,6 +33,9 @@ namespace ModelLayer
         [Column("MeasurementType")]
         public string MeasurementType { get; set; } = string.Empty;
 
+        [Column("UserId")]
+        public int UserId { get; set; }
+
         [Column("CreatedAt")]
         public DateTime CreatedAt { get; set; }
 
@@ -92,6 +95,7 @@ namespace ModelLayer
             Unit2 = secondUnit;
             OperationType = operation;
             Result = resultValue;
+            UserId = 0;
             CreatedAt = DateTime.Now;
         }
     }

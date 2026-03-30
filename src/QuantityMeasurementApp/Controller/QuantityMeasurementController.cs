@@ -14,12 +14,12 @@ namespace QuantityMeasurementApp.Controllers
 
         public QuantityMeasurementDTO Compare(QuantityDTO q1, QuantityDTO q2)
         {
-            return service.Compare(q1, q2);
+            return service.Compare(q1, q2, 0);
         }
 
         public QuantityMeasurementDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit)
         {
-            return service.Add(q1, q2, targetUnit);
+            return service.Add(q1, q2, targetUnit, 0);
         }
 
         public QuantityMeasurementDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit)

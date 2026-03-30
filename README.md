@@ -2,7 +2,7 @@
 
 A layered .NET 10 console application for quantity comparison, conversion, and arithmetic across multiple measurement categories.
 
-The solution is implemented through UC1 to UC16 and includes:
+The solution is implemented through UC1 to UC18 and includes:
 - A generic quantity engine with strong type safety.
 - Category-specific unit adapters for Length, Weight, Volume, and Temperature.
 - A layered application flow (UI -> Controller -> Business -> Repository).
@@ -16,7 +16,7 @@ The solution is implemented through UC1 to UC16 and includes:
 - ASP.NET Core Web API (in `src/QuantityMeasurementWebApi`)
 - Entity Framework Core SQL Server provider (`Microsoft.EntityFrameworkCore.SqlServer`)
 
-## Current Implementation Status (UC1 to UC17)
+## Current Implementation Status (UC1 to UC18)
 
 ### UC1 to UC8: Length Foundations and Arithmetic
 - Length equality and inequality behavior.
@@ -66,6 +66,15 @@ The solution is implemented through UC1 to UC16 and includes:
 - Added centralized global exception middleware returning structured `ErrorResponse` JSON.
 - Added xUnit API test project setup with Moq, ASP.NET Core MVC Testing, and FluentAssertions.
 
+### UC18: Local JWT Authentication (No Google/Firebase)
+- Added local authentication with register and login endpoints under `/api/v1/auth`.
+- Added `UserEntity` persistence model (`Users` table) with fields: Id, FullName, Email, PasswordHash, Role.
+- Added BCrypt password hashing for secure password storage.
+- Added JWT token creation with claims: NameIdentifier (Id), Email, and Role.
+- Secured quantity endpoints using JWT bearer authentication and `[Authorize]`.
+- Swagger UI now includes Bearer JWT authorization support with the `Authorize` button.
+- Measurements now persist `UserId` from JWT claim (`ClaimTypes.NameIdentifier`) for Add and Compare operations.
+
 ## Architecture
 
 ### Layers
@@ -102,6 +111,10 @@ Web API model contracts include request/response DTOs in `src/QuantityMeasuremen
 - `QuantityInputDTO`
 - `QuantityMeasurementDTO`
 
+Authentication DTO contracts are defined in `src/ModelLayer/DTO`:
+- `UserRegisterDTO`
+- `UserLoginDTO`
+
 Web API endpoints are exposed under `/api/v1/quantities` for:
 - `POST /compare`
 - `POST /convert`
@@ -110,11 +123,18 @@ Web API endpoints are exposed under `/api/v1/quantities` for:
 - `POST /divide`
 - `GET /history/operation/{operationType}`
 - `GET /history/type/{measurementType}`
+- `GET /history` (returns only authenticated user's measurements)
 - `GET /count`
+
+Authentication endpoints are exposed under `/api/v1/auth`:
+- `POST /register`
+- `POST /login`
+
+All `/api/v1/quantities/*` endpoints require a valid bearer token from `POST /api/v1/auth/login`.
 
 Web API uses centralized global exception handling middleware (`GlobalExceptionMiddleware`) that returns structured JSON error responses (`ErrorResponse`) for domain and unexpected exceptions.
 
-## Current Implementation Status (UC1 to UC17)
+## Current Implementation Status (UC1 to UC18)
 
 | UC | Area | Changelog Summary |
 | --- | --- | --- |
@@ -135,6 +155,7 @@ Web API uses centralized global exception handling middleware (`GlobalExceptionM
 | UC15 | Layered Persistence | Implemented DTO/entity layering, repository abstraction, and database-mode initialization path. |
 | UC16 | History Query Operations | Added GetAllMeasurements, GetByOperation, GetByType, GetCount, DeleteAll in cache and database repositories. |
 | UC17 | REST API + Global Error Handling | Added Web API endpoints, API DTOs, centralized GlobalExceptionMiddleware with ErrorResponse JSON, and API test project setup. |
+| UC18 | Local JWT Authentication | Added UserEntity persistence, BCrypt hashing, register/login endpoints, JWT claim token generation, and `[Authorize]` protection for quantity APIs. |
 
 ## Configuration
 
@@ -146,6 +167,9 @@ Key settings:
 - RepositoryType: database or cache
 - ConnectionStrings.DefaultConnection: SQL Server connection string
 - Web API EF Core also uses ConnectionStrings.DefaultConnection for QuantityDbContext
+- Jwt.Key: HMAC secret key used for signing and validating JWTs
+- Jwt.Issuer: token issuer value
+- Jwt.Audience: token audience value
 
 Behavior:
 - If RepositoryType is database, startup runs database initialization.

@@ -9,7 +9,8 @@ namespace BusinessLayer
             QuantityDTO second,
             string operation,
             string resultValue,
-            string resultUnit)
+            string resultUnit,
+            int userId)
         {
             return new QuantityMeasurementEntity
             {
@@ -23,6 +24,7 @@ namespace BusinessLayer
                 ResultUnit = resultUnit,
                 ResultMeasurementType = first.MeasurementType,
                 Operation = operation,
+                UserId = userId,
                 IsError = false,
                 ErrorMessage = string.Empty
             };

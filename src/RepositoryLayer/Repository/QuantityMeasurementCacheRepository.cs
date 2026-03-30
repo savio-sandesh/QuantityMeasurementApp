@@ -41,6 +41,14 @@ namespace RepositoryLayer
                 .ToList();
         }
 
+        public IReadOnlyList<QuantityMeasurementEntity> GetHistoryByUserId(int userId)
+        {
+            return cache
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToList();
+        }
+
         public int GetCount()
         {
             return cache.Count;

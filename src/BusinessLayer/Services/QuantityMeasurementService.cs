@@ -17,7 +17,7 @@ namespace BusinessLayer
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public QuantityMeasurementDTO Compare(QuantityDTO q1, QuantityDTO q2)
+        public QuantityMeasurementDTO Compare(QuantityDTO q1, QuantityDTO q2, int userId)
         {
             Logger.Info("Comparing quantities");
 
@@ -34,7 +34,8 @@ namespace BusinessLayer
                 q2,
                 OperationTypeConstants.Compare,
                 resultText,
-                string.Empty);
+                string.Empty,
+                userId);
 
             repository.Save(entity);
 
@@ -43,7 +44,7 @@ namespace BusinessLayer
             return MapToQuantityMeasurementDto(entity, resultText, string.Empty, resultText);
         }
 
-        public QuantityMeasurementDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit)
+        public QuantityMeasurementDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit, int userId)
         {
             Logger.Info("Performing ADD operation");
 
@@ -60,7 +61,8 @@ namespace BusinessLayer
                 q2,
                 OperationTypeConstants.Add,
                 resultValue,
-                targetUnit);
+                targetUnit,
+                userId);
 
             repository.Save(entity);
 
@@ -86,7 +88,8 @@ namespace BusinessLayer
                 q2,
                 OperationTypeConstants.Subtract,
                 resultValue,
-                targetUnit);
+                targetUnit,
+                0);
 
             repository.Save(entity);
 
@@ -112,7 +115,8 @@ namespace BusinessLayer
                 q2,
                 OperationTypeConstants.Divide,
                 resultText,
-                string.Empty);
+                string.Empty,
+                0);
 
             repository.Save(entity);
 
@@ -151,6 +155,12 @@ namespace BusinessLayer
         public List<QuantityMeasurementDTO> GetMeasurementsByType(string type)
         {
             var entities = repository.GetByType(type);
+            return entities.Select(MapFromEntity).ToList();
+        }
+
+        public List<QuantityMeasurementDTO> GetHistoryByUserId(int userId)
+        {
+            var entities = repository.GetHistoryByUserId(userId);
             return entities.Select(MapFromEntity).ToList();
         }
 

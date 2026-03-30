@@ -11,5 +11,6 @@ namespace QuantityMeasurementWebApi.Data
         }
 
         public DbSet<QuantityMeasurementEntity> Measurements { get; set; } = null!;
+        public DbSet<UserEntity> Users { get; set; } = null!;
     }
 }

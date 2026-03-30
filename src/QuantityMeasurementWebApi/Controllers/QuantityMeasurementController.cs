@@ -1,4 +1,6 @@
 using BusinessLayer;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuantityMeasurementWebApi.Models;
 using BusinessQuantityDTO = ModelLayer.QuantityDTO;
@@ -8,6 +10,7 @@ namespace QuantityMeasurementWebApi.Controllers
 {
     [ApiController]
     [Route("api/v1/quantities")]
+    [Authorize]
     public class QuantityMeasurementController : ControllerBase
     {
         private readonly IQuantityMeasurementService _service;
@@ -20,7 +23,8 @@ namespace QuantityMeasurementWebApi.Controllers
         [HttpPost("compare")]
         public IActionResult Compare([FromBody] QuantityInputDTO input)
         {
-            var result = _service.Compare(ToBusinessDto(input.ThisQuantityDTO), ToBusinessDto(input.ThatQuantityDTO));
+            int userId = GetCurrentUserId();
+            var result = _service.Compare(ToBusinessDto(input.ThisQuantityDTO), ToBusinessDto(input.ThatQuantityDTO), userId);
             return Ok(ToApiDto(result));
         }
 
@@ -44,10 +48,12 @@ namespace QuantityMeasurementWebApi.Controllers
                 throw new QuantityMeasurementException("TargetQuantityDTO.Unit is required for addition.");
             }
 
+            int userId = GetCurrentUserId();
             var result = _service.Add(
                 ToBusinessDto(input.ThisQuantityDTO),
                 ToBusinessDto(input.ThatQuantityDTO),
-                input.TargetQuantityDTO.Unit);
+                input.TargetQuantityDTO.Unit,
+                userId);
 
             return Ok(ToApiDto(result));
         }
@@ -93,6 +99,16 @@ namespace QuantityMeasurementWebApi.Controllers
             return Ok(result);
         }
 
+        [HttpGet("history")]
+        public IActionResult GetHistoryByAuthenticatedUser()
+        {
+            int userId = GetCurrentUserId();
+            var result = _service.GetHistoryByUserId(userId)
+                .ConvertAll(ToApiDto);
+
+            return Ok(result);
+        }
+
         [HttpGet("count")]
         public IActionResult GetTotalOperationCount()
         {
@@ -109,6 +125,17 @@ namespace QuantityMeasurementWebApi.Controllers
         private static BusinessQuantityDTO ToBusinessDto(QuantityDTO dto)
         {
             return new BusinessQuantityDTO(dto.Value, dto.Unit, dto.MeasurementType);
+        }
+
+        private int GetCurrentUserId()
+        {
+            var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(claimValue, out int userId))
+            {
+                throw new QuantityMeasurementException("Unable to resolve user id from token.");
+            }
+
+            return userId;
         }
 
         private static QuantityMeasurementDTO ToApiDto(BusinessQuantityMeasurementDTO dto)

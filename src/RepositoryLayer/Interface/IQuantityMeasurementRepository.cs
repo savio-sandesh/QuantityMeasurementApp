@@ -14,6 +14,8 @@ namespace RepositoryLayer
 
         IReadOnlyList<QuantityMeasurementEntity> GetByType(string measurementType);
 
+        IReadOnlyList<QuantityMeasurementEntity> GetHistoryByUserId(int userId);
+
         int GetCount();
 
         void DeleteAll();
