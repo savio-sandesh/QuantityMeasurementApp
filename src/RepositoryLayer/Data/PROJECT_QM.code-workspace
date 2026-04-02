@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../../QuantityMeasurementApp_Frontend"
+		},
+		{
+			"path": "../../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "QuantityMeasurementApp_Frontend"
+	}
+}

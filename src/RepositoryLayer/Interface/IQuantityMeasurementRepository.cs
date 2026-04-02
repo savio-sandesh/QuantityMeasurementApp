@@ -17,6 +17,7 @@ namespace RepositoryLayer
         IReadOnlyList<QuantityMeasurementEntity> GetHistoryByUserId(int userId);
 
         int GetCount();
+        int GetCountByUserId(int userId);
 
         void DeleteAll();
     }

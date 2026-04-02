@@ -49,6 +49,11 @@ namespace RepositoryLayer.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Result");
 
+                    b.Property<string>("ResultUnit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("TargetUnit");
+
                     b.Property<string>("Unit1")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")

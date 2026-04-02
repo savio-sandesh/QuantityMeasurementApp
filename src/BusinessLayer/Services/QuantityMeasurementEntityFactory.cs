@@ -33,7 +33,8 @@ namespace BusinessLayer
         public static QuantityMeasurementEntity CreateConversionOperation(
             QuantityDTO source,
             string targetUnit,
-            string resultValue)
+            string resultValue,
+            int userId)
         {
             return new QuantityMeasurementEntity
             {
@@ -47,6 +48,7 @@ namespace BusinessLayer
                 ResultUnit = targetUnit,
                 ResultMeasurementType = source.MeasurementType,
                 Operation = OperationTypeConstants.Convert,
+                UserId = userId,
                 IsError = false,
                 ErrorMessage = string.Empty
             };

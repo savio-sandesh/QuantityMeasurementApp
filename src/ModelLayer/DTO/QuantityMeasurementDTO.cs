@@ -2,6 +2,9 @@ namespace ModelLayer
 {
     public class QuantityMeasurementDTO
     {
+        public int Id { get; set; }
+        public DateTime CreatedAt { get; set; }
+
         public double ThisValue { get; set; }
         public string ThisUnit { get; set; } = string.Empty;
         public string ThisMeasurementType { get; set; } = string.Empty;

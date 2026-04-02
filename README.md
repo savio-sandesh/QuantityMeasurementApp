@@ -73,7 +73,19 @@ The solution is implemented through UC1 to UC18 and includes:
 - Added JWT token creation with claims: NameIdentifier (Id), Email, and Role.
 - Secured quantity endpoints using JWT bearer authentication and `[Authorize]`.
 - Swagger UI now includes Bearer JWT authorization support with the `Authorize` button.
-- Measurements now persist `UserId` from JWT claim (`ClaimTypes.NameIdentifier`) for Add and Compare operations.
+- Measurements now persist `UserId` from JWT claim (`ClaimTypes.NameIdentifier`) for Compare, Convert, Add, Subtract, and Divide operations.
+- `GET /api/v1/quantities/history` and `GET /api/v1/quantities/stats` are explicitly authenticated and return user-scoped data only.
+- Stats/count responses are now based on authenticated user's records (`UserId`) instead of global database totals.
+- Web API JSON response naming is configured to camelCase for frontend consistency.
+- Web API now auto-applies pending EF Core migrations at startup (`Database.Migrate()`), reducing schema mismatch runtime errors.
+- History payload mapping now includes database-generated `Id` and `CreatedAt` for compare/convert/history responses (serialized as `id` and `createdAt`).
+- `POST /api/v1/quantities/divide` now honors optional `targetQuantityDTO.unit` from request payload and converts the divide result into that target unit before echoing it as `resultUnit` in the response.
+- Web API `QuantityMeasurementDTO.resultValue` is now serialized as a numeric JSON value (decimal) instead of a string for safer frontend math/display handling.
+- Measurement type routing is case-insensitive (for example: `volume`, `Volume`, `VOLUME`) across compare/convert/add/subtract/divide flows.
+- Invalid unit/category combinations now return explicit domain messages with supported units (example: `Litre` with `length` returns a 400 with allowed length units).
+- `POST /api/v1/quantities/divide` accepts `MathRequestDTO` with fields: `firstQuantityDTO`, `secondQuantityDTO`, optional `targetUnit`, and `measurementType`.
+- `POST /api/v1/quantities/divide` response now includes both `resultUnit` and `targetUnit`; `targetUnit` is echoed from request when provided.
+- `Measurements` persistence now includes `TargetUnit` column mapping for stable history reads of divide/add/subtract target units.
 
 ## Architecture
 
@@ -124,6 +136,7 @@ Web API endpoints are exposed under `/api/v1/quantities` for:
 - `GET /history/operation/{operationType}`
 - `GET /history/type/{measurementType}`
 - `GET /history` (returns only authenticated user's measurements)
+- `GET /stats` (returns only authenticated user's total operations)
 - `GET /count`
 
 Authentication endpoints are exposed under `/api/v1/auth`:
@@ -196,6 +209,15 @@ Run full test suite:
 ```bash
 dotnet test .\test\QuantityMeasurementApp.Tests\QuantityMeasurementApp.Tests.csproj
 ```
+
+If you are using SQL persistence, apply latest EF Core migrations after pulling schema changes:
+
+```bash
+dotnet ef database update --project .\src\RepositoryLayer\RepositoryLayer.csproj --startup-project .\src\QuantityMeasurementWebApi\QuantityMeasurementWebApi.csproj
+```
+
+Note:
+- The Web API also attempts to apply pending migrations automatically on startup. Manual `dotnet ef database update` remains useful for controlled deployment workflows.
 
 Latest verified result:
 - 121 tests passed.

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,16 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Database Context Setup (Phase 2)
 builder.Services.AddDbContext<QuantityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettingsDTO>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
@@ -54,7 +65,12 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // 3. Add Controller support (Phase 5)
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 
 // 4. Configure Swagger/OpenAPI (Phase 1 & UC17 Requirement)
 builder.Services.AddEndpointsApiExplorer();
@@ -83,12 +99,28 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Apply pending database migrations on startup so API and schema stay in sync.
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database migration failed: {ex.Message}");
+        throw;
+    }
+}
+
 // 5. Configure the HTTP request pipeline
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionMiddleware>();

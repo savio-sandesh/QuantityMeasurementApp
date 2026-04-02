@@ -54,6 +54,11 @@ namespace RepositoryLayer
             return cache.Count;
         }
 
+        public int GetCountByUserId(int userId)
+        {
+            return cache.Count(x => x.UserId == userId);
+        }
+
         public void DeleteAll()
         {
             cache.Clear();

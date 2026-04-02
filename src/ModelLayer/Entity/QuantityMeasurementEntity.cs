@@ -64,7 +64,7 @@ namespace ModelLayer
         [NotMapped]
         public string ResultValue { get => Result; set => Result = value; }
 
-        [NotMapped]
+        [Column("TargetUnit")]
         public string ResultUnit { get; set; } = string.Empty;
 
         [NotMapped]

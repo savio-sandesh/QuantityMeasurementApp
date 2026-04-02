@@ -4,6 +4,9 @@ namespace QuantityMeasurementWebApi.Models
 {
     public class QuantityMeasurementDTO
     {
+        public int Id { get; set; }
+        public DateTime CreatedAt { get; set; }
+
         public double ThisValue { get; set; }
 
         [Required]
@@ -20,11 +23,13 @@ namespace QuantityMeasurementWebApi.Models
         [Required]
         public string ThatMeasurementType { get; set; } = string.Empty;
 
-        [Required]
-        public string ResultValue { get; set; } = string.Empty;
+        public decimal ResultValue { get; set; }
 
         [Required]
         public string ResultUnit { get; set; } = string.Empty;
+
+        [Required]
+        public string TargetUnit { get; set; } = string.Empty;
 
         [Required]
         public string ResultString { get; set; } = string.Empty;

@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using QuantityMeasurementWebApi.Data;
 using RepositoryLayer.Exceptions;
+using UtilityLayer;
 
 namespace RepositoryLayer
 {
@@ -44,10 +45,25 @@ namespace RepositoryLayer
                 throw new ArgumentNullException(nameof(entity));
             }
 
+            if (entity.UserId <= 0)
+            {
+                Logger.Error($"Invalid UserId while saving measurement history. UserId={entity.UserId}, Operation={entity.OperationType}");
+                throw new DatabaseException("Cannot save measurement history because UserId is missing or invalid.");
+            }
+
             DatabaseOperationExecutor.Execute(() =>
             {
-                _context.Measurements.Add(entity);
-                _context.SaveChanges();
+                try
+                {
+                    _context.Measurements.Add(entity);
+                    _context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    string detail = ex.InnerException?.Message ?? ex.Message;
+                    Logger.Error($"History save failed for UserId={entity.UserId}. Possible FK/constraint issue. Detail: {detail}");
+                    throw;
+                }
             }, "Error saving measurement");
         }
 
@@ -101,6 +117,14 @@ namespace RepositoryLayer
             {
                 return _context.Measurements.Count();
             }, "Error getting count");
+        }
+
+        public int GetCountByUserId(int userId)
+        {
+            return DatabaseOperationExecutor.Execute(() =>
+            {
+                return _context.Measurements.Count(x => x.UserId == userId);
+            }, "Error getting user operation count");
         }
 
         public void DeleteAll()
