@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuantityMeasurementWebApi.Data;
 
@@ -11,9 +12,11 @@ using QuantityMeasurementWebApi.Data;
 namespace RepositoryLayer.Migrations
 {
     [DbContext(typeof(QuantityDbContext))]
-    partial class QuantityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260406134624_AddGoogleAuthFieldsToUsers")]
+    partial class AddGoogleAuthFieldsToUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

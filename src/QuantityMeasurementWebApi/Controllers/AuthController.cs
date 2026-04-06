@@ -28,5 +28,12 @@ namespace QuantityMeasurementWebApi.Controllers
             string token = _authService.Login(userLoginDto);
             return Ok(new { token });
         }
+
+        [HttpPost("google")]
+        public IActionResult GoogleLogin([FromBody] GoogleLoginDTO googleLoginDto)
+        {
+            string token = _authService.LoginWithGoogle(googleLoginDto);
+            return Ok(new { token });
+        }
     }
 }

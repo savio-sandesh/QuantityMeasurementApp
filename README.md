@@ -144,6 +144,10 @@ Authentication endpoints are exposed under `/api/v1/auth`:
 - `POST /register`
 - `POST /login`
 
+Login behavior notes:
+- Strict signup-first flow is enforced for local auth.
+- If login email is not registered, API returns: `No account found with this email. Please sign up first.`
+
 All `/api/v1/quantities/*` endpoints require a valid bearer token from `POST /api/v1/auth/login`.
 
 Web API uses centralized global exception handling middleware (`GlobalExceptionMiddleware`) that returns structured JSON error responses (`ErrorResponse`) for domain and unexpected exceptions.
@@ -279,5 +283,11 @@ Recent clean-code refactors include:
 - Centralized repository exception wrapping.
 - Centralized entity creation for operation persistence records.
 - EF-ready `QuantityMeasurementEntity` annotations for table/column/key mapping (`Measurements`, `Id`, `Value1`, `Unit1`, `Value2`, `Unit2`, `Result`, `OperationType`, `MeasurementType`, `CreatedAt`).
+
+Google authentication support:
+
+- Frontend loads Google Identity Services and renders "Continue with Google" on auth forms.
+- On success, frontend sends Google ID token to backend `/api/v1/auth/google`.
+- Backend returns local JWT, stored using existing token flow and guards.
 
 

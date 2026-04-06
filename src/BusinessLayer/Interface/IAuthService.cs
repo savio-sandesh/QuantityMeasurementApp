@@ -6,5 +6,6 @@ namespace BusinessLayer
     {
         int Register(UserRegisterDTO userRegisterDto);
         string Login(UserLoginDTO userLoginDto);
+        string LoginWithGoogle(GoogleLoginDTO googleLoginDto);
     }
 }

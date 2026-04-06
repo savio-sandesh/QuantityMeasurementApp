@@ -12,7 +12,7 @@ using ModelLayer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Context Setup (Phase 2)
+// 1. Database Context Setup
 builder.Services.AddDbContext<QuantityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -45,10 +45,18 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
     throw new InvalidOperationException("Jwt:Key is required.");
 }
 
-builder.Services.AddSingleton(jwtSettings);
+var googleAuthSettings = builder.Configuration.GetSection("GoogleAuth").Get<GoogleAuthSettingsDTO>()
+    ?? throw new InvalidOperationException("GoogleAuth configuration is missing.");
 
-// 2. Register Repository and Service (Phase 4 - Dependency Injection)
-// Note: Ensure that QuantityMeasurementDatabaseRepository and QuantityMeasurementService are implemented in the RepositoryLayer and BusinessLayer projects respectively, and that they implement the IQuantityMeasurementRepository and IQuantityMeasurementService interfaces.
+if (string.IsNullOrWhiteSpace(googleAuthSettings.ClientId))
+{
+    throw new InvalidOperationException("GoogleAuth:ClientId is required.");
+}
+
+builder.Services.AddSingleton(jwtSettings);
+builder.Services.AddSingleton(googleAuthSettings);
+
+// 2. Register Repository and Services
 builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementDatabaseRepository>();
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -75,7 +83,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 3. Add Controller support (Phase 5)
+// 3. Controllers
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -83,25 +91,23 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-// 4. Configure Swagger/OpenAPI (Phase 1 & UC17 Requirement)
+// 4. Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // 1. Define the security scheme
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Description = "Enter JWT Bearer token **_only_**",
+        Description = "Enter JWT Bearer token only",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "bearer", // Important: must be lowercase 'bearer'
-        BearerFormat = "JWT",
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     };
 
     string securitySchemeId = JwtBearerDefaults.AuthenticationScheme;
     options.AddSecurityDefinition(securitySchemeId, securityScheme);
 
-    // 2. Apply the security requirement globally
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         [new OpenApiSecuritySchemeReference(securitySchemeId, document, null)] = new List<string>()
@@ -110,22 +116,11 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Apply pending database migrations on startup so API and schema stay in sync.
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
-    try
-    {
-        dbContext.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Database migration failed: {ex.Message}");
-        throw;
-    }
+    dbContext.Database.Migrate();
 }
-
-// 5. Configure the HTTP request pipeline
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -136,7 +131,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// 6. Map Controllers (Sare API Endpoints ko register karta hai)
 app.MapControllers();
 
 app.Run();

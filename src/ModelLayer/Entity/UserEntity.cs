@@ -20,12 +20,20 @@ namespace ModelLayer
         [MaxLength(160)]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
         [MaxLength(500)]
-        public string PasswordHash { get; set; } = string.Empty;
+        public string? PasswordHash { get; set; }
 
         [Required]
         [MaxLength(30)]
         public string Role { get; set; } = "User";
+
+        [Required]
+        [MaxLength(30)]
+        public string AuthProvider { get; set; } = "Local";
+
+        [MaxLength(200)]
+        public string? ProviderUserId { get; set; }
+
+        public bool EmailVerified { get; set; } = false;
     }
 }
