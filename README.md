@@ -86,6 +86,7 @@ The solution is implemented through UC1 to UC18 and includes:
 - `POST /api/v1/quantities/divide` accepts `MathRequestDTO` with fields: `firstQuantityDTO`, `secondQuantityDTO`, optional `targetUnit`, and `measurementType`.
 - `POST /api/v1/quantities/divide` response now includes both `resultUnit` and `targetUnit`; `targetUnit` is echoed from request when provided.
 - `Measurements` persistence now includes `TargetUnit` column mapping for stable history reads of divide/add/subtract target units.
+- Compare operation responses and history mapping now expose human-readable `resultString` values (`Equal` / `Not Equal`) instead of numeric labels.
 
 ## Architecture
 
@@ -183,6 +184,10 @@ Key settings:
 - Jwt.Key: HMAC secret key used for signing and validating JWTs
 - Jwt.Issuer: token issuer value
 - Jwt.Audience: token audience value
+
+Local development CORS behavior:
+- Web API CORS policy `AllowFrontend` accepts `http://localhost:*`, `https://localhost:*`, and `http://127.0.0.1:*` origins.
+- This allows Angular dev servers on dynamic ports (for example `http://localhost:4200` or `http://localhost:64139`) to call `/api/v1/*` endpoints without browser preflight rejection.
 
 Behavior:
 - If RepositoryType is database, startup runs database initialization.

@@ -31,7 +31,7 @@ namespace BusinessLayer
 
             bool isEqual = a.Equals(b);
             string numericResult = isEqual ? "1" : "0";
-            string resultText = isEqual.ToString();
+            string resultText = isEqual ? "Equal" : "Not Equal";
 
             var entity = QuantityMeasurementEntityFactory.CreateBinaryOperation(
                 q1,
@@ -282,6 +282,10 @@ namespace BusinessLayer
 
         private static QuantityMeasurementDTO MapFromEntity(QuantityMeasurementEntity entity)
         {
+            string resolvedResultString = string.Equals(entity.Operation, OperationTypeConstants.Compare, StringComparison.OrdinalIgnoreCase)
+                ? (entity.ResultValue == "1" ? "Equal" : "Not Equal")
+                : entity.ResultValue;
+
             return new QuantityMeasurementDTO
             {
                 Id = entity.Id,
@@ -294,7 +298,7 @@ namespace BusinessLayer
                 ThatMeasurementType = entity.SecondMeasurementType,
                 ResultValue = entity.ResultValue,
                 ResultUnit = entity.ResultUnit,
-                ResultString = entity.ResultValue,
+                ResultString = resolvedResultString,
                 Operation = entity.Operation,
                 IsError = entity.IsError,
                 ErrorMessage = entity.ErrorMessage
